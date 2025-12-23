@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import RegisterForm from "@/components/RegisterForm";
 import LoginForm from "@/components/LoginForm";
 import Image from "next/image";
+import Link from "next/link";
 import { translations, Language, languageNames } from "@/lib/translations";
 
 export default function Home() {
@@ -150,6 +151,13 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* Discrete Admin Access */}
+        <footer className="mt-auto py-6 opacity-5 hover:opacity-40 transition-opacity duration-1000">
+          <Link href="/admin" className="text-[10px] text-white/20 hover:text-white transition-colors tracking-tighter uppercase font-medium">
+            &bull;
+          </Link>
+        </footer>
       </div>
     </div>
   );
