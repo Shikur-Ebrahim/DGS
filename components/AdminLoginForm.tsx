@@ -33,23 +33,38 @@ export default function AdminLoginForm() {
         }
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            let user;
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                user = userCredential.user;
+            } catch (loginErr: any) {
+                // If user doesn't exist, try to create it (since credentials are verified against constants above)
+                if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential') {
+                    const { createUserWithEmailAndPassword } = await import("firebase/auth");
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    user = userCredential.user;
+                } else {
+                    throw loginErr;
+                }
+            }
 
-            // Ensure the admin record exists in the Admins collection
-            await ensureAdminRecord(user.uid, email, phoneNumber);
+            if (user) {
+                // Ensure the admin record exists in the Admins collection
+                await ensureAdminRecord(user.uid, email, phoneNumber);
 
-            // Double check if they are in the Admins collection (redundant but safe)
-            const isUserAdmin = await isAdmin(user.uid);
+                // Double check if they are in the Admins collection (redundant but safe)
+                const isUserAdmin = await isAdmin(user.uid);
 
-            if (isUserAdmin) {
-                router.push("/admin/welcome");
-            } else {
-                setError("Access Denied: Not an Administrator");
+                if (isUserAdmin) {
+                    router.push("/admin/welcome");
+                } else {
+                    setError("Access Denied: Not an Administrator");
+                    setIsLoading(false);
+                }
             }
         } catch (err: any) {
             console.error(err);
-            setError("Login Failed: " + err.message);
+            setError("Authentication Failed: " + err.message);
         } finally {
             setIsLoading(false);
         }
