@@ -6,7 +6,7 @@ export interface CustomerData {
     email: string;
     phoneNumber: string;
     country: string;
-    password: string; // Storing password in DB is not recommended if using Auth, but keeping per request
+    password: string; // Used for Auth, not stored in Firestore
     uid?: string;
     createdAt: Timestamp;
 }
