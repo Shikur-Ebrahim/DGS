@@ -152,11 +152,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Discrete Admin Access */}
-        <footer className="mt-auto py-6 opacity-5 hover:opacity-40 transition-opacity duration-1000">
-          <Link href="/admin" className="text-[10px] text-white/20 hover:text-white transition-colors tracking-tighter uppercase font-medium">
-            &bull;
-          </Link>
+        {/* Discrete Admin Access - Visible White Circle Spot */}
+        <footer className="mt-auto py-8">
+          <Link
+            href="/admin"
+            className="block w-2 h-2 rounded-full bg-white/20 hover:bg-white hover:scale-150 transition-all duration-300 shadow-[0_0_10px_rgba(255,255,255,0.3)] mx-auto cursor-pointer"
+            title="Admin Portal"
+          />
         </footer>
       </div>
     </div>
