@@ -3,7 +3,6 @@ import { collection, query, where, getDocs, setDoc, doc, Timestamp } from "fireb
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 export interface CustomerData {
-    fullName: string;
     email: string;
     phoneNumber: string;
     country: string;
@@ -48,7 +47,6 @@ export async function registerCustomer(data: Omit<CustomerData, "createdAt" | "u
 
     // Add customer to Firestore using Auth UID as document ID
     await setDoc(doc(db, "Customers", user.uid), {
-        fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phoneNumber,
         country: data.country,

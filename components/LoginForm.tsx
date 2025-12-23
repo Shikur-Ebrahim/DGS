@@ -63,8 +63,8 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
             await loginWithPhone(rawPhoneNumber, password); // Pass raw number
             setSuccessMessage(t.success.login);
             setTimeout(() => {
-                router.push("/dashboard");
-            }, 1500);
+                router.push("/welcome");
+            }, 1000);
         } catch (err: any) {
             console.error(err);
             setError(t.errors.loginFailed);

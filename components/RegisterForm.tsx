@@ -18,9 +18,7 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
     // Set Ethiopia as the default country
     const ethiopiaCountry = countries.find(c => c.code === "ET") || null;
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(ethiopiaCountry);
-    const [fullName, setFullName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -43,18 +41,14 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
         const newErrors: Record<string, string> = {};
 
         if (!selectedCountry) newErrors.country = t.errors.countryRequired;
-        if (!fullName.trim()) newErrors.fullName = t.errors.fullNameRequired;
 
         // Removed prefix check
         if (!phoneNumber.trim()) {
             newErrors.phoneNumber = t.errors.phoneRequired;
         }
 
-        if (!email.trim()) {
-            newErrors.email = t.errors.emailRequired;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            newErrors.email = t.errors.emailInvalid;
-        }
+        // Removed email validation
+
         if (!password) {
             newErrors.password = t.errors.passwordRequired;
         } else if (password.length < 6) {
@@ -71,11 +65,7 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
     const isFormValid = () => {
         return (
             selectedCountry &&
-            fullName.trim() &&
             phoneNumber.trim() &&
-            // phoneNumber !== selectedCountry?.callingCode + " " && // validation removed
-            email.trim() &&
-            /\S+@\S+\.\S+/.test(email) &&
             password.length >= 6 &&
             password === confirmPassword &&
             !isLoading
@@ -97,12 +87,14 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                     rawPhoneNumber = rawPhoneNumber.replace(prefix, "").replace(/\s/g, "");
                 }
 
+                // Generate a dummy email from phone number for Firebase Auth
+                const dummyEmail = `${rawPhoneNumber}@lumio.com`;
+
                 // Submit form data
                 await registerCustomer({
                     country: selectedCountry?.name || "",
-                    fullName,
                     phoneNumber: rawPhoneNumber, // Send raw digit-only number
-                    email: email.trim(),
+                    email: dummyEmail,
                     password,
                 });
 
@@ -110,8 +102,6 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                 setSuccessMessage(t.success.register);
 
                 // Clear form
-                setFullName("");
-                setEmail("");
                 setPassword("");
                 setConfirmPassword("");
                 setPhoneNumber(""); // Reset to empty
@@ -120,8 +110,6 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                 setTimeout(() => {
                     if (onSuccess) {
                         onSuccess();
-                    } else {
-                        router.push("/login");
                     }
                 }, 2000);
 
@@ -133,7 +121,7 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                 const newErrors: Record<string, string> = {};
 
                 if (errorMessage.includes("email")) {
-                    newErrors.email = "This email address is already in use";
+                    newErrors.phoneNumber = "An account with this phone number (or generated email) already exists";
                 } else if (errorMessage.includes("phone")) {
                     newErrors.phoneNumber = "This phone number is already registered";
                 } else {
@@ -279,35 +267,7 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                     )}
                 </div>
 
-                {/* Full Name */}
-                <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-purple-400 ml-1">
-                        <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        {t.fullName}
-                    </label>
-                    <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => {
-                            setFullName(e.target.value);
-                            setErrors({ ...errors, fullName: "" });
-                        }}
-                        onFocus={() => setFocusedField('fullName')}
-                        onBlur={() => setFocusedField(null)}
-                        placeholder={t.fullName}
-                        className={inputClasses('fullName')}
-                    />
-                    {errors.fullName && (
-                        <p className="text-sm text-red-400 ml-1 flex items-center gap-1 animate-pulse">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            {errors.fullName}
-                        </p>
-                    )}
-                </div>
+
 
                 {/* Phone Number */}
                 {selectedCountry && (
@@ -364,35 +324,7 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                     </div>
                 )}
 
-                {/* Email */}
-                <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-pink-400 ml-1">
-                        <svg className="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        {t.email}
-                    </label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                            setEmail(e.target.value);
-                            setErrors({ ...errors, email: "" });
-                        }}
-                        onFocus={() => setFocusedField('email')}
-                        onBlur={() => setFocusedField(null)}
-                        placeholder={t.email}
-                        className={inputClasses('email')}
-                    />
-                    {errors.email && (
-                        <p className="text-sm text-red-400 ml-1 flex items-center gap-1 animate-pulse">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            {errors.email}
-                        </p>
-                    )}
-                </div>
+
 
                 {/* Password */}
                 <div className="space-y-2">
