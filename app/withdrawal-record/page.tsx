@@ -35,7 +35,7 @@ export default function WithdrawalRecordPage() {
                     const recordsData = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
-                    } as WithdrawalRecord)).sort((a, b) => {
+                    } as WithdrawalRecord)).sort((a: any, b: any) => {
                         const dateA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : 0;
                         const dateB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : 0;
                         return dateB - dateA;

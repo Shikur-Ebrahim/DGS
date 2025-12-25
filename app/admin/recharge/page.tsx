@@ -61,7 +61,7 @@ export default function AdminRechargePage() {
                 } as RechargeRequest));
 
                 // Sort by createdAt (newest first)
-                requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                requests.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
                 setPendingRequests(requests);
                 setIsLoading(false);

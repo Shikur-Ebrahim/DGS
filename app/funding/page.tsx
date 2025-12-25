@@ -20,8 +20,8 @@ export default function FundingPage() {
                 const unsubOrders = onSnapshot(q, (snapshot) => {
                     const ordersData = snapshot.docs.map(doc => ({
                         id: doc.id,
-                        ...doc.data()
-                    })).sort((a, b) => {
+                        ...(doc.data() as any)
+                    })).sort((a: any, b: any) => {
                         const dateA = a.purchaseDate instanceof Timestamp ? a.purchaseDate.toMillis() : 0;
                         const dateB = b.purchaseDate instanceof Timestamp ? b.purchaseDate.toMillis() : 0;
                         return dateB - dateA;
