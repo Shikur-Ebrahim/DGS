@@ -66,8 +66,8 @@ export default function ProductDetailPage() {
                 }
 
                 // --- 2. Commission Logic Preparation (Read Phase) ---
-                const userData = userSnap.data();
-                const inviterRefs = [];
+                const userData = userSnap.data() as any;
+                const inviterRefs: (any | null)[] = [];
                 const inviterIds = [userData.inviterA, userData.inviterB, userData.inviterC, userData.inviterD];
 
                 // Collect non-null inviter references
@@ -112,7 +112,7 @@ export default function ProductDetailPage() {
 
                 inviterSnaps.forEach((invSnap, index) => {
                     if (invSnap && invSnap.exists()) {
-                        const inviterData = invSnap.data();
+                        const inviterData = invSnap.data() as any;
                         const reward = product.price * rates[index];
 
                         // Update Inviter Wallet
@@ -158,7 +158,7 @@ export default function ProductDetailPage() {
                 const docRef = doc(db, "Products", id as string);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setProduct({ id: docSnap.id, ...docSnap.data() });
+                    setProduct({ id: docSnap.id, ...(docSnap.data() as any) });
                 }
             } catch (error) {
                 console.error("Error fetching product:", error);

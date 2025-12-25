@@ -6,7 +6,9 @@ import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import Image from "next/image";
 
-export default function PaymentMethodPage() {
+import { Suspense } from "react";
+
+function PaymentMethodContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const amount = searchParams.get('amount') || '7500';
@@ -20,7 +22,7 @@ export default function PaymentMethodPage() {
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const methodsData = snapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...(doc.data() as any)
             }));
             setPaymentMethods(methodsData);
             setIsLoading(false);
@@ -84,8 +86,8 @@ export default function PaymentMethodPage() {
                                     key={method.id}
                                     onClick={() => setSelectedMethod(method.id)}
                                     className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${selectedMethod === method.id
-                                            ? 'border-purple-600 bg-purple-50 shadow-lg shadow-purple-200'
-                                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                                        ? 'border-purple-600 bg-purple-50 shadow-lg shadow-purple-200'
+                                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4">
@@ -133,5 +135,17 @@ export default function PaymentMethodPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function PaymentMethodPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+            </div>
+        }>
+            <PaymentMethodContent />
+        </Suspense>
     );
 }

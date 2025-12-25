@@ -12,7 +12,9 @@ interface Particle {
     duration: string;
 }
 
-export default function RechargeReviewPage() {
+import { Suspense } from "react";
+
+function RechargeReviewContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const amount = searchParams.get('amount') || '0';
@@ -37,7 +39,7 @@ export default function RechargeReviewPage() {
                 return;
             }
 
-            const data = snapshot.docs[0].data();
+            const data = snapshot.docs[0].data() as any;
             if (data.status === 'approved') {
                 setStatus('approved');
                 // Redirect after a short delay to show "Approved" or go home immediately as requested
@@ -209,5 +211,17 @@ export default function RechargeReviewPage() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function RechargeReviewPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-purple-900 flex items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full"></div>
+            </div>
+        }>
+            <RechargeReviewContent />
+        </Suspense>
     );
 }

@@ -15,7 +15,9 @@ interface Bank {
     status: string;
 }
 
-export default function BankDetailsPage() {
+import { Suspense } from "react";
+
+function BankDetailsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const methodId = searchParams.get('method');
@@ -37,7 +39,7 @@ export default function BankDetailsPage() {
                     const methodDoc = await getDoc(doc(db, "PaymentMethods", methodId));
 
                     if (methodDoc.exists()) {
-                        const methodData = methodDoc.data();
+                        const methodData = methodDoc.data() as any;
                         const accountNumbers = methodData.accountNumbers || [];
 
                         const q = query(
@@ -48,7 +50,7 @@ export default function BankDetailsPage() {
                         const unsubscribe = onSnapshot(q, (snapshot) => {
                             const banksData = snapshot.docs.map(doc => ({
                                 id: doc.id,
-                                ...doc.data()
+                                ...(doc.data() as any)
                             } as Bank));
 
                             const filteredBanks = banksData.filter(bank =>
@@ -116,7 +118,7 @@ export default function BankDetailsPage() {
                 const customersSnapshot = await getDocs(customersQuery);
 
                 if (!customersSnapshot.empty) {
-                    const customerData = customersSnapshot.docs[0].data();
+                    const customerData = customersSnapshot.docs[0].data() as any;
                     phoneNumber = customerData.phoneNumber || '';
                 }
             }
@@ -376,5 +378,17 @@ export default function BankDetailsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function BankDetailsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="animate-spin h-12 w-12 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+            </div>
+        }>
+            <BankDetailsContent />
+        </Suspense>
     );
 }
