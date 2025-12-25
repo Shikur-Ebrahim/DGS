@@ -85,7 +85,7 @@ export default function LoginForm({ }: LoginFormProps) {
     };
 
     return (
-        <div className="w-full max-w-md p-8 rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.1)]">
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.1)] overflow-hidden">
             <div className="text-center mb-8">
                 <div className="relative w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/10 ring-1 ring-white/10">
                     <Image src="/dgs_app_icon.png" alt="Logo" fill className="object-cover scale-110" />
@@ -160,7 +160,7 @@ export default function LoginForm({ }: LoginFormProps) {
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => handlePhoneInput(e.target.value)}
-                            className="relative flex-1 min-w-0 h-12 bg-[#0a0a0a]/50 border border-white/10 border-l-0 rounded-r-xl px-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-bold font-mono"
+                            className="relative flex-1 w-full min-w-0 h-12 bg-[#0a0a0a] border border-white/10 border-l-0 rounded-r-xl px-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-bold font-mono"
                             placeholder="912345678"
                             required
                         />

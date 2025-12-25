@@ -60,13 +60,16 @@ export default function ProductPage() {
                     </button>
                     <h2 className="text-xl font-black text-white tracking-widest uppercase italic">{t.dashboard.market}</h2>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px]">
-                    <div className="w-full h-full rounded-[15px] bg-[#0a0a0a] flex items-center justify-center">
+                <button
+                    onClick={() => router.push('/recharge')}
+                    className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px] transform active:scale-90 transition-all border-0 focus:outline-none"
+                >
+                    <div className="w-full h-full rounded-[15px] bg-[#0a0a0a] flex items-center justify-center hover:bg-white/5 transition-colors">
                         <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 118 0m-4 8l2-2m0 0l2 2m-2-2v4m-3.333-4.857A3 3 0 0115 15.143M3 13.5h.01M3 16h.01m3 1h.01M6 13h.01m3 2h.01m0-3h.01" />
                         </svg>
                     </div>
-                </div>
+                </button>
             </div>
 
             <div className="relative z-10 p-5 space-y-8 animate-fade-in">

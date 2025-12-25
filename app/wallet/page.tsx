@@ -94,33 +94,7 @@ export default function WalletPage() {
                             </h3>
                         </div>
 
-                        {/* Deposit Card Button - Bottom Left */}
-                        <button
-                            onClick={() => hasPendingRecharge ? router.push(`/recharge-review?amount=${pendingAmount}`) : router.push('/recharge')}
-                            className="absolute bottom-5 left-5 flex items-center gap-3 px-5 py-3 bg-[#0f172a]/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl hover:bg-[#0f172a]/60 active:scale-95 transition-all cursor-pointer z-50 group/deposit ring-1 ring-white/5"
-                        >
-                            <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400 group-hover/deposit:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
-                            </div>
-                            <div className="text-left">
-                                <span className="block text-[10px] font-bold text-gray-400 leading-none mb-0.5">{t.dashboard.addMoney}</span>
-                                <span className="block text-sm font-black tracking-wider text-white group-hover/deposit:text-emerald-300 transition-colors">{t.dashboard.depositBtn}</span>
-                            </div>
-                        </button>
 
-                        {/* Do Tasks Card Button - Bottom Right */}
-                        <button
-                            onClick={() => router.push('/tasks')}
-                            className="absolute bottom-5 right-5 flex items-center gap-3 px-5 py-3 bg-[#0f172a]/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl hover:bg-[#0f172a]/60 active:scale-95 transition-all cursor-pointer z-50 group/tasks ring-1 ring-white/5 text-right"
-                        >
-                            <div className="text-right">
-                                <span className="block text-[10px] font-bold text-gray-400 leading-none mb-0.5">{t.dashboard.earnMore}</span>
-                                <span className="block text-sm font-black tracking-wider text-white group-hover/tasks:text-cyan-300 transition-colors">{t.dashboard.doTasksBtn}</span>
-                            </div>
-                            <div className="p-1.5 rounded-full bg-cyan-500/20 text-cyan-400 group-hover/tasks:text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.2)]">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        </button>
                     </div>
                 </div>
 
@@ -143,8 +117,9 @@ export default function WalletPage() {
                                     <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{t.dashboard.taskIncome}</p>
                                     <svg className="w-3 h-3 text-blue-500/40 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                                 </div>
-                                <p className="text-lg font-black text-white">
-                                    ${userData?.taskWallet !== undefined ? userData.taskWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                <p className="text-lg font-black text-white flex items-baseline gap-1">
+                                    {userData?.taskWallet !== undefined ? userData.taskWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                    <span className="text-[10px] text-blue-400 font-bold">ETB</span>
                                 </p>
                             </div>
                         </div>
