@@ -5,15 +5,20 @@ import RegisterForm from "@/components/RegisterForm";
 import LoginForm from "@/components/LoginForm";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLanguage } from "@/lib/LanguageContext";
 import { translations, Language, languageNames } from "@/lib/translations";
+import { Suspense } from "react";
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-  const [currentLanguage, setCurrentLanguage] = useState<Language>("en");
+function HomeContent() {
+  const [activeTab, setActiveTab] = useState<"login" | "register">("register");
+  const { language: currentLanguage, setLanguage: setCurrentLanguage, t } = useLanguage();
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [adminClickCount, setAdminClickCount] = useState(0);
   const langDropdownRef = useRef<HTMLDivElement>(null);
-
-  const t = translations[currentLanguage];
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const referralId = searchParams.get("ref") || undefined;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,34 +43,52 @@ export default function Home() {
       {/* TOP HEADER: Logo Left / Selector Right */}
       <div className="relative z-50 flex items-center justify-between gap-6 mb-8 md:mb-12 animate-fade-in-down w-full max-w-7xl mx-auto px-4 md:px-8">
         {/* Logo - Bold & Large */}
-        <div className="hover:scale-110 transition-transform duration-500 cursor-pointer group">
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter bg-gradient-to-r from-orange-500 via-yellow-400 via-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.4)] group-hover:drop-shadow-[0_0_50px_rgba(168,85,247,0.6)] transition-all animate-movable">
-            Lumio
-          </h1>
+        <div
+          className="hover:scale-110 transition-transform duration-500 cursor-pointer group flex items-center"
+          onClick={() => {
+            const newCount = adminClickCount + 1;
+            if (newCount >= 5) {
+              router.push("/admin");
+              setAdminClickCount(0);
+            } else {
+              setAdminClickCount(newCount);
+            }
+          }}
+        >
+          <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all duration-500">
+            <Image
+              src="/dgs_app_icon.png"
+              alt="DGS PRO"
+              fill
+              className="object-cover scale-110 group-hover:scale-125 transition-transform duration-700"
+            />
+          </div>
+          <div className="ml-4 flex flex-col">
+            <span className="text-4xl md:text-5xl font-black tracking-tighter text-white leading-none">DGS</span>
+            <span className="text-[10px] md:text-xs font-black tracking-[0.3em] text-blue-400 uppercase opacity-60">Investment</span>
+          </div>
         </div>
 
         {/* Premium Language Selector - Far Right */}
-        <div className="relative group pill-container" ref={langDropdownRef}>
-          {/* Outer glow effect */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-
+        <div className="relative" ref={langDropdownRef}>
           <button
             onClick={() => setShowLangDropdown(!showLangDropdown)}
-            className="relative flex items-center gap-3 px-5 py-2.5 rounded-full bg-[#1a1a1a]/80 border border-white/10 text-gray-300 hover:text-white transition-all duration-300 backdrop-blur-xl shadow-2xl overflow-hidden group/btn"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#d1d5db] rounded-[8px] text-[#4b5563] hover:bg-gray-50 transition-all duration-200 shadow-sm"
           >
-            {/* Hover sweep effect */}
-            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full group-hover/btn:translate-x-[200%] transition-transform duration-700 ease-in-out"></div>
-
-            <span className="text-xl leading-none">{languageNames[currentLanguage].flag}</span>
-            <span className="text-sm font-semibold tracking-wide uppercase">{languageNames[currentLanguage].name}</span>
-            <svg className={`w-4 h-4 text-purple-400 transition-transform duration-500 ease-out ${showLangDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-[#6b7280]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span className="text-[15px] font-medium">{languageNames[currentLanguage].name}</span>
+            <svg className={`w-4 h-4 text-[#6b7280] transition-transform duration-200 ${showLangDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {showLangDropdown && (
-            <div className="absolute right-0 mt-3 w-64 p-2 bg-[#1a1a1a]/95 backdrop-blur-2xl border border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60] animate-tab-switch overflow-hidden">
-              <div className="max-h-[70vh] overflow-y-auto scrollbar-none">
+            <div className="absolute right-0 mt-1 w-48 bg-white border border-[#e5e7eb] rounded-[8px] shadow-lg z-[60] overflow-hidden">
+              <div className="max-h-[300px] overflow-y-auto scrollbar-thin">
                 {(Object.keys(languageNames) as Language[]).map((lang) => (
                   <button
                     key={lang}
@@ -73,30 +96,16 @@ export default function Home() {
                       setCurrentLanguage(lang);
                       setShowLangDropdown(false);
                     }}
-                    className={`w-full px-4 py-3.5 flex items-center gap-4 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${currentLanguage === lang
-                      ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    className={`w-full px-4 py-2 flex items-center justify-between transition-colors duration-150 ${currentLanguage === lang
+                      ? 'bg-[#f3f4f6] text-[#111827] font-semibold'
+                      : 'text-[#4b5563] hover:bg-gray-50'
                       }`}
                   >
-                    {/* Active indicator bar */}
+                    <span className="text-[14px]">{languageNames[lang].name}</span>
                     {currentLanguage === lang && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-500 rounded-r-full animate-pulse-slow"></div>
-                    )}
-
-                    <span className="text-2xl group-hover/item:scale-125 transition-transform duration-300">{languageNames[lang].flag}</span>
-                    <div className="flex flex-col text-left">
-                      <span className="text-sm font-bold tracking-tight">{languageNames[lang].name}</span>
-                      <span className="text-[10px] text-gray-500 uppercase tracking-widest group-hover/item:text-gray-300 transition-colors">
-                        {lang === 'en' ? 'Default' : 'Localized'}
-                      </span>
-                    </div>
-
-                    {currentLanguage === lang && (
-                      <div className="ml-auto w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
-                        <svg className="w-3 h-3 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
+                      <svg className="w-4 h-4 text-[#10b981]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                     )}
                   </button>
                 ))}
@@ -138,29 +147,29 @@ export default function Home() {
           <div className="relative">
             {activeTab === "login" ? (
               <div className="animate-fade-in">
-                <LoginForm lang={currentLanguage} onLanguageChange={setCurrentLanguage} />
+                <LoginForm />
               </div>
             ) : (
               <div className="animate-fade-in">
                 <RegisterForm
-                  lang={currentLanguage}
-                  onLanguageChange={setCurrentLanguage}
                   onSuccess={() => setActiveTab("login")}
+                  referralId={referralId}
                 />
               </div>
             )}
           </div>
         </div>
 
-        {/* Discrete Admin Access - Visible White Circle Spot */}
-        <footer className="mt-auto py-8">
-          <Link
-            href="/admin"
-            className="block w-2 h-2 rounded-full bg-white/20 hover:bg-white hover:scale-150 transition-all duration-300 shadow-[0_0_10px_rgba(255,255,255,0.3)] mx-auto cursor-pointer"
-            title="Admin Portal"
-          />
-        </footer>
+
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

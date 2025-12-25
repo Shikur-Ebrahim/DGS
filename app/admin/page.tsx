@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
             <div className="relative z-10 w-full flex flex-col items-center">
                 <div className="mb-12 hover:scale-105 transition-transform duration-500 cursor-pointer group">
                     <h1 className="text-7xl md:text-8xl font-black tracking-tighter bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-                        Lumio
+                        DGS
                     </h1>
                     <div className="h-1 w-full bg-gradient-to-r from-transparent via-blue-500/50 to-transparent mt-2 rounded-full"></div>
                 </div>

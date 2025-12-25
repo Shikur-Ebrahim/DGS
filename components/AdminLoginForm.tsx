@@ -74,24 +74,24 @@ export default function AdminLoginForm() {
         <div className="w-full max-w-md p-8 rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(59,130,246,0.1)]">
             <div className="text-center mb-8">
                 <div className="inline-block px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">
-                    Secure Admin Access
+                    DGS Team Access
                 </div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-200 to-blue-400 bg-clip-text text-transparent">
-                    Admin Portal
+                    Management Portal
                 </h2>
-                <p className="text-gray-400 mt-2">Enter credentials to manage Lumio</p>
+                <p className="text-gray-400 mt-2">Enter credentials to manage DGS</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Email Address */}
                 <div className="space-y-2 text-left">
-                    <label className="text-sm font-medium text-gray-300 ml-1">Admin Email</label>
+                    <label className="text-sm font-medium text-gray-300 ml-1">Staff Email</label>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full h-12 bg-[#0a0a0a]/50 border border-white/10 rounded-xl px-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all"
-                        placeholder="admin@lumio.com"
+                        placeholder="admin@dgs.com"
                         required
                     />
                 </div>
@@ -160,7 +160,7 @@ export default function AdminLoginForm() {
                             <span>Verifying...</span>
                         </>
                     ) : (
-                        <span>Admin Login</span>
+                        <span>Team Login</span>
                     )}
                 </button>
             </form>

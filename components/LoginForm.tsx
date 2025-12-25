@@ -6,15 +6,14 @@ import { countries } from "@/lib/countries";
 import Image from "next/image";
 import { loginWithPhone } from "@/lib/customerService";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface LoginFormProps {
-    lang?: Language;
-    onLanguageChange?: (lang: Language) => void;
 }
 
-export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormProps) {
+export default function LoginForm({ }: LoginFormProps) {
     const router = useRouter();
-    const t = translations[lang];
+    const { language: lang, setLanguage: onLanguageChange, t } = useLanguage();
     const ethiopia = countries.find(c => c.code === "ET") || countries[0];
     const [selectedCountry, setSelectedCountry] = useState(ethiopia);
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
@@ -23,7 +22,7 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
+
     const [error, setError] = useState("");
 
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,7 +47,7 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
-        setSuccessMessage("");
+
         setLoading(true);
 
         try {
@@ -61,7 +60,7 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
 
             // const fullPhoneNumber = `${selectedCountry.code} ${phoneNumber}`; // Removed prefix logic
             await loginWithPhone(rawPhoneNumber, password); // Pass raw number
-            setSuccessMessage(t.success.login);
+
             setTimeout(() => {
                 router.push("/welcome");
             }, 1000);
@@ -88,6 +87,9 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
     return (
         <div className="w-full max-w-md p-8 rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.1)]">
             <div className="text-center mb-8">
+                <div className="relative w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/10 ring-1 ring-white/10">
+                    <Image src="/dgs_app_icon.png" alt="Logo" fill className="object-cover scale-110" />
+                </div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
                     {t.welcomeBack}
                 </h2>
@@ -215,7 +217,7 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
                 {/* Login Button */}
                 <button
                     type="submit"
-                    disabled={loading || !!successMessage}
+                    disabled={loading}
                     className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
                 >
                     {loading ? (
@@ -231,20 +233,7 @@ export default function LoginForm({ lang = "en", onLanguageChange }: LoginFormPr
                     )}
                 </button>
 
-                {/* Success Message - Moved Below Button */}
-                {successMessage && (
-                    <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 shadow-lg shadow-green-500/10 animate-fade-in group">
-                        <div className="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors duration-300"></div>
-                        <div className="relative flex items-center justify-center gap-3">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center ring-1 ring-green-500/30">
-                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <p className="text-green-300 font-medium text-sm">{successMessage}</p>
-                        </div>
-                    </div>
-                )}
+
 
             </form>
         </div >

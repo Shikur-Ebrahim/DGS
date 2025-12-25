@@ -6,28 +6,29 @@ import { countries, Country } from "@/lib/countries";
 import { registerCustomer } from "@/lib/customerService";
 import { useRouter } from "next/navigation";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface RegisterFormProps {
     onSuccess?: () => void;
-    lang?: Language;
-    onLanguageChange?: (lang: Language) => void;
+    referralId?: string;
 }
 
-export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange }: RegisterFormProps) {
-    const t = translations[lang];
+export default function RegisterForm({ onSuccess, referralId }: RegisterFormProps) {
+    const { language: lang, setLanguage: onLanguageChange, t } = useLanguage();
     // Set Ethiopia as the default country
     const ethiopiaCountry = countries.find(c => c.code === "ET") || null;
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(ethiopiaCountry);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [invitationCode, setInvitationCode] = useState(referralId || "");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
+
     const router = useRouter();
 
     // Auto-fill phone code when country is selected
@@ -42,12 +43,22 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
 
         if (!selectedCountry) newErrors.country = t.errors.countryRequired;
 
-        // Removed prefix check
         if (!phoneNumber.trim()) {
             newErrors.phoneNumber = t.errors.phoneRequired;
+        } else if (selectedCountry) {
+            const raw = phoneNumber.replace(selectedCountry.callingCode, "").replace(/\s/g, "");
+            if (selectedCountry.code === "ET") {
+                if (raw && raw[0] !== "9") {
+                    newErrors.phoneNumber = "Number must start with 9";
+                } else if (raw.length !== 9) {
+                    newErrors.phoneNumber = "Number must be exactly 9 digits";
+                }
+            } else {
+                if (raw.length < 7 || raw.length > 15) {
+                    newErrors.phoneNumber = "Invalid phone number length";
+                }
+            }
         }
-
-        // Removed email validation
 
         if (!password) {
             newErrors.password = t.errors.passwordRequired;
@@ -74,32 +85,40 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSuccessMessage("");
+
         setErrors({});
+
+        // Universal check for phone number validation on click
+        let rawValue = phoneNumber;
+        if (selectedCountry) {
+            const prefix = selectedCountry.callingCode;
+            rawValue = rawValue.replace(prefix, "").replace(/\s/g, "");
+        }
+
+        let isPhoneValid = false;
+        if (selectedCountry?.code === "ET") {
+            isPhoneValid = rawValue.length === 9 && rawValue[0] === "9";
+        } else if (selectedCountry) {
+            isPhoneValid = rawValue.length >= 7 && rawValue.length <= 15;
+        }
+
+        if (!isPhoneValid) {
+            setErrors({ form: "Please fill the correct phone number" });
+            return;
+        }
 
         if (validateForm()) {
             setIsLoading(true);
             try {
-                // Extract raw number by removing prefix
-                let rawPhoneNumber = phoneNumber;
-                if (selectedCountry) {
-                    const prefix = selectedCountry.callingCode;
-                    rawPhoneNumber = rawPhoneNumber.replace(prefix, "").replace(/\s/g, "");
-                }
-
-                // Generate a dummy email from phone number for Firebase Auth
-                const dummyEmail = `${rawPhoneNumber}@lumio.com`;
-
                 // Submit form data
                 await registerCustomer({
                     country: selectedCountry?.name || "",
-                    phoneNumber: rawPhoneNumber, // Send raw digit-only number
-                    email: dummyEmail,
+                    phoneNumber: rawValue, // Send raw digit-only number
+                    email: `${rawValue}@lumio.com`,
                     password,
-                });
+                }, invitationCode); // Pass invitation code
 
-                // Show success message
-                setSuccessMessage(t.success.register);
+
 
                 // Clear form
                 setPassword("");
@@ -169,6 +188,9 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
     return (
         <div className="w-full max-w-md p-8 rounded-2xl bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.1)]">
             <div className="text-center mb-8">
+                <div className="relative w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/10 ring-1 ring-white/10">
+                    <Image src="/dgs_app_icon.png" alt="Logo" fill className="object-cover scale-110" />
+                </div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
                     {t.createAccount}
                 </h2>
@@ -374,6 +396,8 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                     )}
                 </div>
 
+
+
                 {/* Confirm Password */}
                 <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-semibold text-red-400 ml-1">
@@ -421,6 +445,8 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                         </p>
                     )}
                 </div>
+
+
 
                 {/* Register Button and Msgs */}
                 <div className="space-y-4">
@@ -474,22 +500,9 @@ export default function RegisterForm({ onSuccess, lang = "en", onLanguageChange 
                         )}
                     </button>
 
-                    {/* Success Message */}
-                    {successMessage && (
-                        <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 shadow-lg shadow-green-500/10 animate-fade-in group">
-                            <div className="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors duration-300"></div>
-                            <div className="relative flex items-center justify-center gap-3">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center ring-1 ring-green-500/30">
-                                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <p className="text-green-300 font-medium text-sm">{successMessage}</p>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
-            </form>
-        </div>
+            </form >
+        </div >
     );
 }

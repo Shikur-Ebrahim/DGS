@@ -8,7 +8,25 @@ export interface CustomerData {
     country: string;
     password: string; // Used for Auth, not stored in Firestore
     uid?: string;
+    referralCode: string; // Last 8 digits of phone number
     createdAt: Timestamp;
+    // Wallet Tracking
+    balanceWallet: number;
+    taskWallet: number;
+    inviteWallet: number;
+    // Income Tracking
+    totalIncome: number;
+    dailyIncome: number;
+    // Product Tracking
+    productName: string | null;
+    productPrice: number;
+    // Inviter Hierarchy
+    inviterA: string | null; // direct inviter
+    inviterB: string | null; // inviter of inviter A
+    inviterC: string | null; // inviter of inviter B
+    inviterD: string | null; // inviter of inviter C
+
+    VIP: number;
 }
 
 /**
@@ -34,12 +52,37 @@ export async function checkPhoneExists(phoneNumber: string): Promise<boolean> {
 /**
  * Register a new customer in Firebase Auth and Customers collection
  */
-export async function registerCustomer(data: Omit<CustomerData, "createdAt" | "uid">): Promise<string> {
-    // Check if phone already exists (Auth handles email check, but Firestore check prevents duplicates in DB if Auth fails midway)
+export async function registerCustomer(
+    data: Omit<CustomerData, "createdAt" | "uid" | "referralCode" | "balanceWallet" | "taskWallet" | "inviteWallet" | "totalIncome" | "dailyIncome" | "productName" | "productPrice" | "inviterA" | "inviterB" | "inviterC" | "inviterD" | "VIP">,
+    invitationCode?: string
+): Promise<string> {
+    // Check if phone already exists
     const phoneExists = await checkPhoneExists(data.phoneNumber);
     if (phoneExists) {
         throw new Error("This phone number is already registered");
     }
+
+    // Resolve inviter hierarchy
+    let inviterA: string | null = null;
+    let inviterB: string | null = null;
+    let inviterC: string | null = null;
+    let inviterD: string | null = null;
+
+    if (invitationCode) {
+        // Find inviter by referralCode
+        const inviterSnap = await getDocs(query(collection(db, "Customers"), where("referralCode", "==", invitationCode)));
+
+        if (!inviterSnap.empty) {
+            const inviterData = inviterSnap.docs[0].data() as CustomerData;
+            inviterA = inviterData.uid || null; // The inviter's UID is still used for the hierarchy links
+            inviterB = inviterData.inviterA || null;
+            inviterC = inviterData.inviterB || null;
+            inviterD = inviterData.inviterC || null;
+        }
+    }
+
+    // Generate Referral Code (Last 8 digits of phone number)
+    const referralCode = data.phoneNumber.slice(-8);
 
     // Create user in Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -51,7 +94,21 @@ export async function registerCustomer(data: Omit<CustomerData, "createdAt" | "u
         phoneNumber: data.phoneNumber,
         country: data.country,
         uid: user.uid,
+        referralCode,
         createdAt: Timestamp.now(),
+        // Default values for automatic fields
+        balanceWallet: 0,
+        taskWallet: 0,
+        inviteWallet: 0,
+        totalIncome: 0,
+        dailyIncome: 0,
+        productName: null,
+        productPrice: 0,
+        inviterA,
+        inviterB,
+        inviterC,
+        inviterD,
+        VIP: 0,
     });
 
     return user.uid;
