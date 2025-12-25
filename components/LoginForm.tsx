@@ -100,7 +100,7 @@ export default function LoginForm({ }: LoginFormProps) {
                 {/* Phone Input */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-300 ml-1">{t.phoneNumber}</label>
-                    <div className="relative flex group">
+                    <div className="relative flex group w-full">
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
 
                         {/* Country Selector */}
@@ -156,12 +156,11 @@ export default function LoginForm({ }: LoginFormProps) {
                             )}
                         </div>
 
-                        {/* Phone Input Field */}
                         <input
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => handlePhoneInput(e.target.value)}
-                            className="relative flex-1 h-12 bg-[#eef2ff] border border-white/10 border-l-0 rounded-r-xl px-4 text-black placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-bold font-mono"
+                            className="relative flex-1 min-w-0 h-12 bg-[#0a0a0a]/50 border border-white/10 border-l-0 rounded-r-xl px-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-bold font-mono"
                             placeholder="912345678"
                             required
                         />

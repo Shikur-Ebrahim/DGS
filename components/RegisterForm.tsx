@@ -300,12 +300,12 @@ export default function RegisterForm({ onSuccess, referralId }: RegisterFormProp
                             </svg>
                             {t.phoneNumber}
                         </label>
-                        <div className="flex group">
+                        <div className="flex group w-full">
                             <div className="relative">
                                 <button
                                     type="button"
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="relative h-14 flex items-center gap-3 pl-4 pr-3 bg-[#0a0a0a] border-2 border-gray-700 rounded-l-xl hover:border-gray-600 transition-all border-r-0 focus:outline-none"
+                                    className="relative h-14 flex items-center gap-3 pl-4 pr-3 bg-gray-900 border-2 border-gray-700 rounded-l-xl hover:border-gray-600 transition-all border-r-0 focus:outline-none"
                                 >
                                     <div className="w-8 h-6 rounded overflow-hidden shadow-lg ring-2 ring-blue-400/50">
                                         <Image
@@ -331,7 +331,7 @@ export default function RegisterForm({ onSuccess, referralId }: RegisterFormProp
                                 }}
                                 onFocus={() => setFocusedField('phoneNumber')}
                                 onBlur={() => setFocusedField(null)}
-                                className="flex-1 h-14 px-4 bg-[#eef2ff] border-2 border-gray-700 border-l-0 rounded-r-xl text-black placeholder-gray-500 focus:outline-none transition-all font-bold font-mono"
+                                className="flex-1 min-w-0 h-14 px-4 bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-gray-700 border-l-0 rounded-r-xl text-white placeholder-gray-500 focus:outline-none transition-all font-bold font-mono"
                                 placeholder="912345678"
                             />
                         </div>
