@@ -14,10 +14,14 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// Only initialize if API key is present
+const app = (typeof window !== "undefined" || process.env.NEXT_PUBLIC_FIREBASE_API_KEY)
+    ? (!getApps().length ? initializeApp(firebaseConfig) : getApp())
+    : ({} as any);
+
+const auth = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? getAuth(app) : ({} as any);
+const db = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? getFirestore(app) : ({} as any);
+const storage = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? getStorage(app) : ({} as any);
 
 let analytics;
 if (typeof window !== "undefined") {

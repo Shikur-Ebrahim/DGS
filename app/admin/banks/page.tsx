@@ -69,7 +69,7 @@ export default function AdminBanksPage() {
     }, [notification]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -81,8 +81,8 @@ export default function AdminBanksPage() {
         });
 
         const q = query(collection(db, "Banks"), orderBy("createdAt", "desc"));
-        const unsubscribeBanks = onSnapshot(q, (snapshot) => {
-            const banksData = snapshot.docs.map(doc => ({
+        const unsubscribeBanks = onSnapshot(q, (snapshot: any) => {
+            const banksData = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             }));

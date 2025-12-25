@@ -27,7 +27,7 @@ export default function AboutPage() {
         try {
             const q = query(collection(db, "about"), orderBy("order", "asc"));
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as AboutItem[];
+            const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) as AboutItem[];
             setItems(data);
         } catch (error) {
             console.error("Error:", error);

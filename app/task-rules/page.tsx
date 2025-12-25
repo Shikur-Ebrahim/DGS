@@ -33,7 +33,7 @@ export default function TaskRulesPage() {
     const [activeTab, setActiveTab] = useState<'rules' | 'games'>('rules');
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user: any) => {
             if (user) {
                 fetchData();
             } else {
@@ -48,7 +48,7 @@ export default function TaskRulesPage() {
             // Fetch withdrawal rules
             const rulesQuery = query(collection(db, "dailyTaskRules"), orderBy("teamSize", "asc"));
             const rulesSnapshot = await getDocs(rulesQuery);
-            const rulesData = rulesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WithdrawalRule[];
+            const rulesData = rulesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) as WithdrawalRule[];
             setRules(rulesData);
 
             // Fetch game settings
@@ -108,8 +108,8 @@ export default function TaskRulesPage() {
                     <button
                         onClick={() => setActiveTab('rules')}
                         className={`flex-1 py-3 rounded-2xl font-bold transition-all ${activeTab === 'rules'
-                                ? 'bg-white text-blue-600 shadow-xl'
-                                : 'bg-white/20 text-white'
+                            ? 'bg-white text-blue-600 shadow-xl'
+                            : 'bg-white/20 text-white'
                             }`}
                     >
                         💎 VIP Levels
@@ -117,8 +117,8 @@ export default function TaskRulesPage() {
                     <button
                         onClick={() => setActiveTab('games')}
                         className={`flex-1 py-3 rounded-2xl font-bold transition-all ${activeTab === 'games'
-                                ? 'bg-white text-purple-600 shadow-xl'
-                                : 'bg-white/20 text-white'
+                            ? 'bg-white text-purple-600 shadow-xl'
+                            : 'bg-white/20 text-white'
                             }`}
                     >
                         🎮 How to Play
@@ -146,7 +146,7 @@ export default function TaskRulesPage() {
                                     <p className="text-white/60">No VIP levels available yet</p>
                                 </div>
                             ) : (
-                                rules.map(rule => (
+                                rules.map((rule: any) => (
                                     <div key={rule.id} className={`bg-gradient-to-br ${colors[rule.color] || 'from-blue-500 to-blue-600'} rounded-3xl p-6 shadow-2xl`}>
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="text-5xl">{rule.icon}</div>

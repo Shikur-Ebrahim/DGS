@@ -118,7 +118,7 @@ export default function AdminGameSettingsPage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-white rounded-xl p-3">
                                 <p className="text-xs text-gray-600">Active Games</p>
-                                <p className="text-2xl font-black text-green-600">{Object.values(games).filter(g => g.active).length}</p>
+                                <p className="text-2xl font-black text-green-600">{Object.values(games).filter((g: any) => g.active).length}</p>
                             </div>
                             <div className="bg-white rounded-xl p-3">
                                 <p className="text-xs text-gray-600">Total Games</p>
@@ -126,11 +126,11 @@ export default function AdminGameSettingsPage() {
                             </div>
                             <div className="bg-white rounded-xl p-3">
                                 <p className="text-xs text-gray-600">Avg Reward</p>
-                                <p className="text-2xl font-black text-purple-600">${Math.round(Object.values(games).reduce((a, b) => a + b.reward, 0) / Object.keys(games).length)}</p>
+                                <p className="text-2xl font-black text-purple-600">${Math.round(Object.values(games).reduce((a: number, b: any) => a + b.reward, 0) / Object.keys(games).length)}</p>
                             </div>
                             <div className="bg-white rounded-xl p-3">
                                 <p className="text-xs text-gray-600">Max Daily</p>
-                                <p className="text-2xl font-black text-orange-600">${Object.values(games).filter(g => g.active).reduce((a, b) => a + b.reward, 0)}</p>
+                                <p className="text-2xl font-black text-orange-600">${Object.values(games).filter((g: any) => g.active).reduce((a: number, b: any) => a + b.reward, 0)}</p>
                             </div>
                         </div>
                     </div>

@@ -22,7 +22,7 @@ export default function AdminSidebar() {
             collection(db, "RechargeReview"),
             where("status", "==", "pending")
         );
-        const unsubscribeRecharge = onSnapshot(rechargeQuery, (snapshot) => {
+        const unsubscribeRecharge = onSnapshot(rechargeQuery, (snapshot: any) => {
             setPendingRechargeCount(snapshot.docs.length);
         });
 
@@ -31,7 +31,7 @@ export default function AdminSidebar() {
             collection(db, "withdraw"),
             where("status", "==", "pending")
         );
-        const unsubscribeWithdrawal = onSnapshot(withdrawalQuery, (snapshot) => {
+        const unsubscribeWithdrawal = onSnapshot(withdrawalQuery, (snapshot: any) => {
             setPendingWithdrawalCount(snapshot.docs.length);
         });
 

@@ -55,7 +55,7 @@ export default function AddWithdrawalBankPage() {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -170,7 +170,7 @@ export default function AddWithdrawalBankPage() {
                                     onChange={(e) => setSelectedBank(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white font-bold focus:ring-2 focus:ring-blue-500/40 outline-none transition-all appearance-none"
                                 >
-                                    {COMMON_BANKS.map(b => <option key={b} value={b} className="bg-gray-900">{b}</option>)}
+                                    {COMMON_BANKS.map((b: string) => <option key={b} value={b} className="bg-gray-900">{b}</option>)}
                                 </select>
                             </div>
 

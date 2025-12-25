@@ -17,10 +17,10 @@ export default function ProfilePage() {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const userRef = doc(db, "Customers", user.uid);
-                const unsubDoc = onSnapshot(userRef, (docSnap) => {
+                const unsubDoc = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUserData({ uid: user.uid, ...docSnap.data() });
                     }

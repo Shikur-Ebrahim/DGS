@@ -26,13 +26,13 @@ export default function WithdrawalRecordPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const withdrawRef = collection(db, "withdraw");
                 const q = query(withdrawRef, where("userId", "==", user.uid));
 
-                const unsubRecords = onSnapshot(q, (snapshot) => {
-                    const recordsData = snapshot.docs.map(doc => ({
+                const unsubRecords = onSnapshot(q, (snapshot: any) => {
+                    const recordsData = snapshot.docs.map((doc: any) => ({
                         id: doc.id,
                         ...doc.data()
                     } as WithdrawalRecord)).sort((a: any, b: any) => {
@@ -119,7 +119,7 @@ export default function WithdrawalRecordPage() {
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
                                 <p className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest mb-1">Pending Sync</p>
                                 <h4 className="text-2xl font-black text-white leading-none tracking-tighter">
-                                    {records.filter(r => r.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
+                                    {records.filter((r: any) => r.status === 'pending').reduce((acc: any, curr: any) => acc + curr.amount, 0).toLocaleString()}
                                     <span className="text-[10px] ml-1 opacity-40">ETB</span>
                                 </h4>
                             </div>
@@ -127,7 +127,7 @@ export default function WithdrawalRecordPage() {
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
                                 <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Finalized</p>
                                 <h4 className="text-2xl font-black text-white leading-none tracking-tighter">
-                                    {records.filter(r => r.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
+                                    {records.filter((r: any) => r.status === 'approved').reduce((acc: any, curr: any) => acc + curr.amount, 0).toLocaleString()}
                                     <span className="text-[10px] ml-1 opacity-40">ETB</span>
                                 </h4>
                             </div>

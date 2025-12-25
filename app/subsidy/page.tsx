@@ -12,13 +12,13 @@ export default function SubsidyPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const ordersRef = collection(db, "UserOrders");
                 const q = query(ordersRef, where("userId", "==", user.uid));
 
-                const unsubOrders = onSnapshot(q, (snapshot) => {
-                    const ordersData = snapshot.docs.map(doc => ({
+                const unsubOrders = onSnapshot(q, (snapshot: any) => {
+                    const ordersData = snapshot.docs.map((doc: any) => ({
                         id: doc.id,
                         ...(doc.data() as any)
                     }));
@@ -35,9 +35,9 @@ export default function SubsidyPage() {
         return () => unsubscribeAuth();
     }, [router]);
 
-    const totalInvestment = orders.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
-    const totalDailyIncome = orders.reduce((acc, curr) => acc + (Number(curr.dailyIncome) || 0), 0);
-    const totalProfitEarned = orders.reduce((acc, curr) => acc + (Number(curr.totalProfit) || 0), 0);
+    const totalInvestment = orders.reduce((acc: number, curr: any) => acc + (Number(curr.price) || 0), 0);
+    const totalDailyIncome = orders.reduce((acc: number, curr: any) => acc + (Number(curr.dailyIncome) || 0), 0);
+    const totalProfitEarned = orders.reduce((acc: number, curr: any) => acc + (Number(curr.totalProfit) || 0), 0);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -112,7 +112,7 @@ export default function SubsidyPage() {
                             </div>
                         </div>
                     ) : (
-                        orders.map((order, idx) => (
+                        orders.map((order: any, idx: number) => (
                             <div key={order.id} className="relative group animate-slide-up-fade" style={{ animationDelay: `${idx * 100}ms` }}>
                                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent rounded-[2.5rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <div className="relative bg-[#111111] border border-white/5 rounded-[2.5rem] p-7 transition-all duration-500 hover:border-amber-500/30">

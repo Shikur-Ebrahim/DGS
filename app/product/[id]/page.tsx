@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
     }, [notification]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user: any) => {
             if (user) setUserId(user.uid);
             else setUserId(null);
         });
@@ -81,7 +81,7 @@ export default function ProductDetailPage() {
 
                 // Read all inviters
                 const inviterSnaps = await Promise.all(
-                    inviterRefs.map(ref => ref ? transaction.get(ref) : Promise.resolve(null))
+                    inviterRefs.map((ref: any) => ref ? transaction.get(ref) : Promise.resolve(null))
                 );
 
                 // --- 3. Deduct balance and add FIRST day's income immediately ---

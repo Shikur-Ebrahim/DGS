@@ -40,7 +40,7 @@ export default function AdminPaymentMethodsPage() {
     }, [notification]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -52,8 +52,8 @@ export default function AdminPaymentMethodsPage() {
         });
 
         const q = query(collection(db, "PaymentMethods"), orderBy("createdAt", "desc"));
-        const unsubscribeMethods = onSnapshot(q, (snapshot) => {
-            const methodsData = snapshot.docs.map(doc => ({
+        const unsubscribeMethods = onSnapshot(q, (snapshot: any) => {
+            const methodsData = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             }));
@@ -116,7 +116,7 @@ export default function AdminPaymentMethodsPage() {
     const handleAddMethod = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const validAccountNumbers = accountNumbers.filter(num => num.trim() !== "");
+        const validAccountNumbers = accountNumbers.filter((num: string) => num.trim() !== "");
 
         if (!methodName || !logoFile || validAccountNumbers.length === 0) {
             showNotification("Please provide all fields.", "error");

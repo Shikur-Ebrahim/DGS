@@ -35,7 +35,7 @@ export default function AdminAboutPage() {
         try {
             const q = query(collection(db, "about"), orderBy("order", "asc"));
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as AboutItem[];
+            const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) as AboutItem[];
             setItems(data);
         } catch (error) {
             console.error("Error:", error);
@@ -181,7 +181,7 @@ export default function AdminAboutPage() {
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-2 gap-6">
-                            {items.map(item => (
+                            {items.map((item: any) => (
                                 <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
                                     <div className="relative h-64">
                                         <img src={item.image} alt={item.title} className="w-full h-full object-cover" />

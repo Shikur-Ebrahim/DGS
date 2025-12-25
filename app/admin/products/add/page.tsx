@@ -47,7 +47,7 @@ export default function AddProductPage() {
     }, [notification]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {

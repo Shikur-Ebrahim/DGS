@@ -19,8 +19,8 @@ function PaymentMethodContent() {
 
     useEffect(() => {
         const q = query(collection(db, "PaymentMethods"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const methodsData = snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            const methodsData = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...(doc.data() as any)
             }));

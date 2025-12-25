@@ -58,7 +58,7 @@ export default function WithdrawalBanksManagementPage() {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -72,10 +72,10 @@ export default function WithdrawalBanksManagementPage() {
         });
 
         const q = query(collection(db, "WithdrawalBanks"), orderBy("createdAt", "desc"));
-        const unsubscribeBanks = onSnapshot(q, (snapshot) => {
-            setBanks(snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) })));
+        const unsubscribeBanks = onSnapshot(q, (snapshot: any) => {
+            setBanks(snapshot.docs.map((doc: any) => ({ id: doc.id, ...(doc.data() as any) })));
             setIsLoading(false);
-        }, (error) => {
+        }, (error: any) => {
             console.error("Error fetching banks:", error);
             setIsLoading(false);
         });
@@ -203,7 +203,7 @@ export default function WithdrawalBanksManagementPage() {
 
                 {isLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[1, 2, 3].map(i => <div key={i} className="h-40 bg-white/5 rounded-3xl animate-pulse"></div>)}
+                        {[1, 2, 3].map((i: number) => <div key={i} className="h-40 bg-white/5 rounded-3xl animate-pulse"></div>)}
                     </div>
                 ) : banks.length === 0 ? (
                     <div className="text-center py-24 bg-white/5 rounded-[3rem] border-2 border-dashed border-white/10 flex flex-col items-center gap-4">
@@ -215,7 +215,7 @@ export default function WithdrawalBanksManagementPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {banks.map(bank => (
+                        {banks.map((bank: any) => (
                             <div key={bank.id} className="group bg-[#141414] border border-white/5 rounded-[2.5rem] p-6 hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/5">
                                 <div className="flex flex-col items-center text-center">
                                     <div className="w-24 h-24 rounded-3xl bg-white p-3 flex items-center justify-center mb-5 shadow-2xl overflow-hidden relative border border-white/10">
@@ -257,7 +257,7 @@ export default function WithdrawalBanksManagementPage() {
                                     onChange={(e) => setEditSelectedBank(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:ring-2 focus:ring-blue-500/40"
                                 >
-                                    {COMMON_BANKS.map(b => <option key={b} value={b} className="bg-gray-900">{b}</option>)}
+                                    {COMMON_BANKS.map((b: string) => <option key={b} value={b} className="bg-gray-900">{b}</option>)}
                                 </select>
                             </div>
 

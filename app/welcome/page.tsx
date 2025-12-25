@@ -53,8 +53,8 @@ export default function WelcomePage() {
     // Fetch Notifications
     useEffect(() => {
         const q = query(collection(db, "Notifications"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            setNotifications(snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            setNotifications(snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             })));
@@ -74,8 +74,8 @@ export default function WelcomePage() {
                 );
                 const snapshot = await getDocs(q);
                 const latestActive = snapshot.docs
-                    .map(d => ({ id: d.id, ...d.data() } as any))
-                    .find(n => n.isActive);
+                    .map((d: any) => ({ id: d.id, ...d.data() } as any))
+                    .find((n: any) => n.isActive);
 
                 if (latestActive) {
                     setPlatformNotification(latestActive);
@@ -116,9 +116,9 @@ export default function WelcomePage() {
     useEffect(() => {
         let unsubscribeDoc: (() => void) | null = null;
 
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
-                unsubscribeDoc = onSnapshot(doc(db, "Customers", user.uid), (doc) => {
+                unsubscribeDoc = onSnapshot(doc(db, "Customers", user.uid), (doc: any) => {
                     if (doc.exists()) {
                         const data = doc.data();
                         setUserData({

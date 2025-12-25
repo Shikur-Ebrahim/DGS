@@ -31,7 +31,7 @@ export default function AdminRechargePage() {
     const [confirmAction, setConfirmAction] = useState<'approve' | 'delete' | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -54,8 +54,8 @@ export default function AdminRechargePage() {
                 where("status", "==", "pending")
             );
 
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const requests = snapshot.docs.map(doc => ({
+            const unsubscribe = onSnapshot(q, (snapshot: any) => {
+                const requests = snapshot.docs.map((doc: any) => ({
                     id: doc.id,
                     ...doc.data()
                 } as RechargeRequest));

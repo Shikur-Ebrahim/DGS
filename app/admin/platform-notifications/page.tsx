@@ -34,7 +34,7 @@ export default function AdminPlatformNotificationPage() {
         try {
             const q = query(collection(db, "platformNotifications"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PlatformNotification[];
+            const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) as PlatformNotification[];
             setNotifications(data);
         } catch (error) {
             console.error("Error:", error);
@@ -190,7 +190,7 @@ export default function AdminPlatformNotificationPage() {
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-2 gap-6">
-                            {notifications.map(notification => (
+                            {notifications.map((notification: any) => (
                                 <div key={notification.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-blue-200">
                                     <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4">
                                         <div className="flex items-center justify-between">

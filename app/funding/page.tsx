@@ -12,13 +12,13 @@ export default function FundingPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const ordersRef = collection(db, "UserOrders");
                 const q = query(ordersRef, where("userId", "==", user.uid));
 
-                const unsubOrders = onSnapshot(q, (snapshot) => {
-                    const ordersData = snapshot.docs.map(doc => ({
+                const unsubOrders = onSnapshot(q, (snapshot: any) => {
+                    const ordersData = snapshot.docs.map((doc: any) => ({
                         id: doc.id,
                         ...(doc.data() as any)
                     })).sort((a: any, b: any) => {

@@ -16,8 +16,8 @@ export default function ProductPage() {
 
     useEffect(() => {
         const q = query(collection(db, "Products"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const productsData = snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            const productsData = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...(doc.data() as any)
             }));

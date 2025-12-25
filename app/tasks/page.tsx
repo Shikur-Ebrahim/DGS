@@ -43,7 +43,7 @@ export default function DailyGamesPage() {
     const [prizeBoxOpened, setPrizeBoxOpened] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user: any) => {
             if (user) {
                 setUserId(user.uid);
                 fetchGames(user.uid);
@@ -206,7 +206,7 @@ export default function DailyGamesPage() {
         const newBalloons = [...balloons];
         newBalloons[i] = false;
         setBalloons(newBalloons);
-        const popped = newBalloons.filter(b => !b).length;
+        const popped = newBalloons.filter((b: boolean) => !b).length;
         if (popped === 9) {
             await saveReward('balloon', games.balloon.reward);
         }
@@ -250,7 +250,7 @@ export default function DailyGamesPage() {
         await saveReward('prize', reward);
     };
 
-    const activeGames = Object.entries(games).filter(([_, g]) => g.active);
+    const activeGames = Object.entries(games).filter(([_, g]: [string, any]) => g.active);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 text-white pb-24 relative overflow-hidden">
@@ -284,7 +284,7 @@ export default function DailyGamesPage() {
             )}
 
             <div className="relative z-10 px-5 -mt-6 space-y-4">
-                {activeGames.map(([key, game]) => {
+                {activeGames.map(([key, game]: [string, any]) => {
                     const played = playedGames.has(key);
 
                     return (
@@ -318,7 +318,7 @@ export default function DailyGamesPage() {
                             {key === 'slot' && (
                                 <div className="flex flex-col items-center">
                                     <div className="flex gap-2 mb-4">
-                                        {slots.map((s, i) => <div key={i} className="w-16 h-16 bg-white rounded-xl flex items-center justify-center text-3xl">{s}</div>)}
+                                        {slots.map((s: string, i: number) => <div key={i} className="w-16 h-16 bg-white rounded-xl flex items-center justify-center text-3xl">{s}</div>)}
                                     </div>
                                     <button onClick={playSlot} disabled={played || slotting} className={`px-8 py-3 rounded-2xl font-bold ${played || slotting ? 'bg-gray-500' : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105'}`}>
                                         {slotting ? t.dashboard.spinning : played ? t.dashboard.played : t.dashboard.pullBtn}
@@ -328,7 +328,7 @@ export default function DailyGamesPage() {
 
                             {key === 'scratch' && (
                                 <div className="grid grid-cols-3 gap-2">
-                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i: number) => (
                                         <button key={i} onClick={() => playScratch(i)} disabled={played || scratched.includes(i)} className={`aspect-square rounded-xl text-2xl ${scratched.includes(i) ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-gray-900' : 'bg-gray-700 hover:scale-105'}`}>
                                             {scratched.includes(i) ? '💰' : '?'}
                                         </button>

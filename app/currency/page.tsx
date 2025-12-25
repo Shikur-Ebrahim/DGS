@@ -11,10 +11,10 @@ export default function CurrencyPage() {
     const [userData, setUserData] = useState<any | null>(null);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const userRef = doc(db, "Customers", user.uid);
-                const unsubDoc = onSnapshot(userRef, (docSnap) => {
+                const unsubDoc = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUserData({ uid: user.uid, ...docSnap.data() });
                     }

@@ -33,7 +33,7 @@ export default function WithdrawalWalletPage() {
         try {
             const q = query(collection(db, "withdraw"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({
+            const data = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...(doc.data() as any)
             })) as Withdrawal[];
@@ -55,7 +55,7 @@ export default function WithdrawalWalletPage() {
             });
 
             // Update local state
-            setWithdrawals(prev => prev.map(w =>
+            setWithdrawals((prev: any[]) => prev.map((w: any) =>
                 w.id === id ? { ...w, status: newStatus } : w
             ));
 
@@ -68,7 +68,7 @@ export default function WithdrawalWalletPage() {
         }
     };
 
-    const filteredWithdrawals = withdrawals.filter(w => {
+    const filteredWithdrawals = withdrawals.filter((w: any) => {
         if (filter === 'all') return true;
         return w.status === filter;
     });
@@ -105,7 +105,7 @@ export default function WithdrawalWalletPage() {
                                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                     }`}
                             >
-                                {tab} ({withdrawals.filter(w => tab === 'all' || w.status === tab).length})
+                                {tab} ({withdrawals.filter((w: any) => tab === 'all' || w.status === tab).length})
                             </button>
                         ))}
                     </div>

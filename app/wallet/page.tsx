@@ -18,11 +18,11 @@ export default function WalletPage() {
         let unsubDoc: (() => void) | null = null;
         let unsubRecharge: (() => void) | null = null;
 
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 // User Data Listener
                 const userRef = doc(db, "Customers", user.uid);
-                unsubDoc = onSnapshot(userRef, (docSnap) => {
+                unsubDoc = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUserData({ uid: user.uid, ...docSnap.data() });
                     }
@@ -35,7 +35,7 @@ export default function WalletPage() {
                     where("status", "==", "pending")
                 );
 
-                unsubRecharge = onSnapshot(q, (snapshot) => {
+                unsubRecharge = onSnapshot(q, (snapshot: any) => {
                     if (!snapshot.empty) {
                         const pendingRequest = snapshot.docs[0].data();
                         setHasPendingRecharge(true);

@@ -25,7 +25,7 @@ export default function WithdrawalPasswordPage() {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const pwdRef = doc(db, "WithdrawalPasswords", user.uid);
                 const pwdSnap = await getDoc(pwdRef);

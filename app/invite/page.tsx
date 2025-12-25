@@ -16,10 +16,10 @@ export default function InvitePage() {
 
     useEffect(() => {
         setBaseUrl(window.location.origin);
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const userRef = doc(db, "Customers", user.uid);
-                const unsub = onSnapshot(userRef, (docSnap) => {
+                const unsub = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUserData({ uid: user.uid, ...docSnap.data() });
                     }

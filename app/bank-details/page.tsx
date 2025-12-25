@@ -47,13 +47,13 @@ function BankDetailsContent() {
                             where("status", "==", "Active")
                         );
 
-                        const unsubscribe = onSnapshot(q, (snapshot) => {
-                            const banksData = snapshot.docs.map(doc => ({
+                        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+                            const banksData = snapshot.docs.map((doc: any) => ({
                                 id: doc.id,
                                 ...(doc.data() as any)
                             } as Bank));
 
-                            const filteredBanks = banksData.filter(bank =>
+                            const filteredBanks = banksData.filter((bank: any) =>
                                 accountNumbers.includes(bank.accountNumber)
                             );
 

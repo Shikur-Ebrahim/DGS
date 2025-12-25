@@ -51,7 +51,7 @@ export default function DailyTaskRulesPage() {
         try {
             const q = query(collection(db, "dailyTaskRules"), orderBy("teamSize", "asc"));
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WithdrawalRule[];
+            const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) as WithdrawalRule[];
             setRules(data);
         } catch (error) {
             console.error("Error:", error);
@@ -154,7 +154,7 @@ export default function DailyTaskRulesPage() {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Select Icon</label>
                                     <div className="flex gap-2">
-                                        {icons.map(icon => (
+                                        {icons.map((icon: string) => (
                                             <button key={icon} type="button" onClick={() => setSelectedIcon(icon)} className={`w-12 h-12 rounded-xl border-2 text-2xl transition-all ${selectedIcon === icon ? 'border-blue-500 bg-blue-50 scale-110' : 'border-gray-200 hover:border-blue-300'}`}>
                                                 {icon}
                                             </button>
@@ -165,7 +165,7 @@ export default function DailyTaskRulesPage() {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Select Color</label>
                                     <div className="flex gap-2">
-                                        {colors.map(color => (
+                                        {colors.map((color: any) => (
                                             <button key={color.name} type="button" onClick={() => setSelectedColor(color.name)} className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color.class} border-2 transition-all ${selectedColor === color.name ? 'border-gray-900 scale-110' : 'border-transparent'}`} />
                                         ))}
                                     </div>
@@ -194,7 +194,7 @@ export default function DailyTaskRulesPage() {
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {rules.map(rule => (
+                            {rules.map((rule: any) => (
                                 <div key={rule.id} className={`bg-gradient-to-br ${colors.find(c => c.name === rule.color)?.class || 'from-blue-500 to-blue-600'} rounded-2xl p-6 text-white shadow-xl`}>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">

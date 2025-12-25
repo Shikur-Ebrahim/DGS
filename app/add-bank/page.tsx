@@ -17,13 +17,13 @@ export default function AddBankPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = auth.onAuthStateChanged((user: any) => {
             if (!user) router.push("/login");
         });
 
         const banksRef = collection(db, "WithdrawalBanks");
-        const unsubBanks = onSnapshot(banksRef, (snapshot) => {
-            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+        const unsubBanks = onSnapshot(banksRef, (snapshot: any) => {
+            const banksData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...(doc.data() as any) }));
             setAvailableBanks(banksData);
             setLoading(false);
         });
@@ -172,7 +172,7 @@ export default function AddBankPage() {
                             </button>
                         </div>
                         <div className="overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                            {availableBanks.map((bank) => (
+                            {availableBanks.map((bank: any) => (
                                 <button
                                     key={bank.id}
                                     onClick={() => {

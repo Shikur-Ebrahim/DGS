@@ -16,7 +16,7 @@ export default function AdminWelcomePage() {
     const [pendingWithdrawalCount, setPendingWithdrawalCount] = useState(0);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -54,7 +54,7 @@ export default function AdminWelcomePage() {
                 where("status", "==", "pending")
             );
 
-            const unsubscribeRecharge = onSnapshot(rechargeQuery, (snapshot) => {
+            const unsubscribeRecharge = onSnapshot(rechargeQuery, (snapshot: any) => {
                 setPendingRechargeCount(snapshot.docs.length);
             });
 
@@ -64,7 +64,7 @@ export default function AdminWelcomePage() {
                 where("status", "==", "pending")
             );
 
-            const unsubscribeWithdrawal = onSnapshot(withdrawalQuery, (snapshot) => {
+            const unsubscribeWithdrawal = onSnapshot(withdrawalQuery, (snapshot: any) => {
                 setPendingWithdrawalCount(snapshot.docs.length);
             });
 

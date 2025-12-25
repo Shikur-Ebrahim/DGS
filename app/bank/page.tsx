@@ -14,13 +14,13 @@ export default function UserBankPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const banksRef = collection(db, "UserLinkedBanks");
                 const q = query(banksRef, where("userId", "==", user.uid));
 
-                const unsubBanks = onSnapshot(q, (snapshot) => {
-                    const banksData = snapshot.docs.map(doc => ({
+                const unsubBanks = onSnapshot(q, (snapshot: any) => {
+                    const banksData = snapshot.docs.map((doc: any) => ({
                         id: doc.id,
                         ...(doc.data() as any)
                     })).sort((a: any, b: any) => {

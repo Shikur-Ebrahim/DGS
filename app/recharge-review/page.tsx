@@ -32,7 +32,7 @@ function RechargeReviewContent() {
             where("userId", "==", user.uid)
         );
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
             if (snapshot.empty) {
                 // If the document is gone (deleted after 10s), or never existed, we can redirect
                 // But we usually want to wait for the 'approved' status first

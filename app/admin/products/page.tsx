@@ -40,7 +40,7 @@ export default function ProductManagementPage() {
 
     // Admin Auth Check
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user: any) => {
             if (user) {
                 const isUserAdmin = await isAdmin(user.uid);
                 if (!isUserAdmin) {
@@ -61,14 +61,14 @@ export default function ProductManagementPage() {
         if (isChecking) return;
 
         const q = query(collection(db, "Products"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const productList = snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            const productList = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             }));
             setProducts(productList);
             setLoading(false);
-        }, (error) => {
+        }, (error: any) => {
             console.error("Error fetching products:", error);
             showNotification("Failed to load products", "error");
             setLoading(false);
@@ -198,7 +198,7 @@ export default function ProductManagementPage() {
 
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[1, 2, 3].map(i => <div key={i} className="h-64 bg-white/5 rounded-[2rem] animate-pulse"></div>)}
+                        {[1, 2, 3].map((i: number) => <div key={i} className="h-64 bg-white/5 rounded-[2rem] animate-pulse"></div>)}
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-white/10">

@@ -31,11 +31,11 @@ export default function TeamPage() {
 
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 // 1. User Data Listener
                 const userRef = doc(db, "Customers", user.uid);
-                const unsubDoc = onSnapshot(userRef, (docSnap) => {
+                const unsubDoc = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUserData({ uid: user.uid, ...docSnap.data() });
                     }
@@ -49,9 +49,9 @@ export default function TeamPage() {
                     const levelKey = String.fromCharCode(66 + idx); // B, C, D, E
                     const q = query(customersRef, where(field, "==", user.uid));
 
-                    return onSnapshot(q, (snapshot) => {
+                    return onSnapshot(q, (snapshot: any) => {
                         const count = snapshot.size;
-                        const assets = snapshot.docs.reduce((acc, d) => acc + (d.data().balanceWallet || 0), 0);
+                        const assets = snapshot.docs.reduce((acc: any, d: any) => acc + (d.data().balanceWallet || 0), 0);
 
                         setTeamStats(prev => ({
                             ...prev,
@@ -64,7 +64,7 @@ export default function TeamPage() {
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
                             const todayTimestamp = Timestamp.fromDate(today);
-                            const increasedToday = snapshot.docs.filter(d => {
+                            const increasedToday = snapshot.docs.filter((d: any) => {
                                 const createdAt = d.data().createdAt;
                                 return createdAt && createdAt.toMillis() >= todayTimestamp.toMillis();
                             }).length;
@@ -100,8 +100,8 @@ export default function TeamPage() {
         const inviterField = tabToField[activeTab];
         const q = query(customersRef, where(inviterField, "==", userData.uid));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const members = snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            const members = snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             }));

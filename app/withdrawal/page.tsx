@@ -54,11 +54,11 @@ export default function WithdrawalPage() {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
             if (firebaseUser) {
                 // Fetch User Data
                 const userRef = doc(db, "Customers", firebaseUser.uid);
-                const userUnsub = onSnapshot(userRef, (docSnap) => {
+                const userUnsub = onSnapshot(userRef, (docSnap: any) => {
                     if (docSnap.exists()) {
                         setUser({ id: docSnap.id, ...docSnap.data() });
                     }
@@ -78,8 +78,8 @@ export default function WithdrawalPage() {
 
         // Fetch Supported Banks
         const banksRef = collection(db, "WithdrawalBanks");
-        const banksUnsub = onSnapshot(banksRef, (snapshot) => {
-            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+        const banksUnsub = onSnapshot(banksRef, (snapshot: any) => {
+            const banksData = snapshot.docs.map((doc: any) => ({ id: doc.id, ...(doc.data() as any) }));
             setAvailableBanks(banksData);
         });
 
@@ -405,7 +405,7 @@ export default function WithdrawalPage() {
                             </button>
                         </div>
                         <div className="overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                            {availableBanks.map(bank => (
+                            {availableBanks.map((bank: any) => (
                                 <button
                                     key={bank.id}
                                     onClick={() => {

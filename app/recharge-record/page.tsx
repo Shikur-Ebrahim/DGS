@@ -12,13 +12,13 @@ export default function RechargeRecordPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
             if (user) {
                 const rechargeRef = collection(db, "RechargeReview");
                 const q = query(rechargeRef, where("userId", "==", user.uid));
 
-                const unsubRecords = onSnapshot(q, (snapshot) => {
-                    const recordsData = snapshot.docs.map(doc => ({
+                const unsubRecords = onSnapshot(q, (snapshot: any) => {
+                    const recordsData = snapshot.docs.map((doc: any) => ({
                         id: doc.id,
                         ...(doc.data() as any)
                     })).sort((a: any, b: any) => {
@@ -102,7 +102,7 @@ export default function RechargeRecordPage() {
                             <div>
                                 <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Lifetime Top-up</p>
                                 <h4 className="text-3xl font-black text-white tracking-tighter">
-                                    {records.filter(r => r.status === 'approved').reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0).toLocaleString()}
+                                    {records.filter((r: any) => r.status === 'approved').reduce((acc: any, curr: any) => acc + (Number(curr.amount) || 0), 0).toLocaleString()}
                                     <span className="text-xs ml-1.5 text-blue-500/60 uppercase">ETB</span>
                                 </h4>
                             </div>

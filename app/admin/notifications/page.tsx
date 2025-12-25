@@ -36,8 +36,8 @@ export default function AdminNotificationsPage() {
     // Fetch notifications
     useEffect(() => {
         const q = query(collection(db, "Notifications"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            setNotifications(snapshot.docs.map(doc => ({
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+            setNotifications(snapshot.docs.map((doc: any) => ({
                 id: doc.id,
                 ...doc.data()
             })));
