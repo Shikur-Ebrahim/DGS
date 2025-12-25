@@ -23,7 +23,7 @@ export default function AddBankPage() {
 
         const banksRef = collection(db, "WithdrawalBanks");
         const unsubBanks = onSnapshot(banksRef, (snapshot) => {
-            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
             setAvailableBanks(banksData);
             setLoading(false);
         });

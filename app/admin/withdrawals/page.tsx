@@ -35,7 +35,7 @@ export default function WithdrawalWalletPage() {
             const snapshot = await getDocs(q);
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...(doc.data() as any)
             })) as Withdrawal[];
             setWithdrawals(data);
         } catch (error) {
@@ -101,8 +101,8 @@ export default function WithdrawalWalletPage() {
                                 key={tab}
                                 onClick={() => setFilter(tab)}
                                 className={`px-6 py-3 rounded-xl font-bold capitalize transition-all whitespace-nowrap ${filter === tab
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                                        : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                     }`}
                             >
                                 {tab} ({withdrawals.filter(w => tab === 'all' || w.status === tab).length})

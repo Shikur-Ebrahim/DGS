@@ -19,7 +19,7 @@ export default function ProductPage() {
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const productsData = snapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...(doc.data() as any)
             }));
             setProducts(productsData);
             setLoading(false);

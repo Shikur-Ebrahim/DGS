@@ -79,7 +79,7 @@ export default function WithdrawalPage() {
         // Fetch Supported Banks
         const banksRef = collection(db, "WithdrawalBanks");
         const banksUnsub = onSnapshot(banksRef, (snapshot) => {
-            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const banksData = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
             setAvailableBanks(banksData);
         });
 

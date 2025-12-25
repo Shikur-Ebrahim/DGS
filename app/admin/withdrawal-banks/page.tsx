@@ -73,7 +73,7 @@ export default function WithdrawalBanksManagementPage() {
 
         const q = query(collection(db, "WithdrawalBanks"), orderBy("createdAt", "desc"));
         const unsubscribeBanks = onSnapshot(q, (snapshot) => {
-            setBanks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            setBanks(snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) })));
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching banks:", error);
