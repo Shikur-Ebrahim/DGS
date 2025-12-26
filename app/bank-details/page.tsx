@@ -28,7 +28,7 @@ function BankDetailsContent() {
     const [showBankDetails, setShowBankDetails] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [copied, setCopied] = useState<string>('');
-    const [countdown, setCountdown] = useState(180); // 3 minutes
+    const [countdown, setCountdown] = useState(600); // 10 minutes
     const [ftCode, setFtCode] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,7 +86,7 @@ function BankDetailsContent() {
     const handleBankSelect = (bank: Bank) => {
         setSelectedBank(bank);
         setShowBankDetails(true);
-        setCountdown(180); // Reset countdown
+        setCountdown(600); // Reset countdown
     };
 
     const copyToClipboard = (text: string, field: string) => {

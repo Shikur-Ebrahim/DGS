@@ -84,13 +84,12 @@ export default function ProductDetailPage() {
                     inviterRefs.map((ref: any) => ref ? transaction.get(ref) : Promise.resolve(null))
                 );
 
-                // --- 3. Deduct balance and add FIRST day's income immediately ---
-                const firstDayIncome = product.dailyIncome || 0;
+                // --- 3. Deduct balance ONLY (Income starts after 24h) ---
                 transaction.update(userRef, {
-                    balanceWallet: currentBalance - product.price + firstDayIncome
+                    balanceWallet: currentBalance - product.price
                 });
 
-                // --- 4. Create Active Investment Order with 1 day already paid ---
+                // --- 4. Create Active Investment Order ---
                 const orderRef = doc(collection(db, "UserOrders"));
                 transaction.set(orderRef, {
                     userId,
@@ -99,10 +98,10 @@ export default function ProductDetailPage() {
                     price: product.price,
                     dailyIncome: product.dailyIncome,
                     contractPeriod: product.contractPeriod,
-                    remainingDays: product.contractPeriod - 1, // First day already paid now
+                    remainingDays: product.contractPeriod, // Full period remains
                     totalProfit: product.totalProfit,
                     principalIncome: product.principalIncome,
-                    status: (product.contractPeriod - 1) <= 0 ? "completed" : "active",
+                    status: (product.contractPeriod) <= 0 ? "completed" : "active",
                     purchaseDate: serverTimestamp(),
                     lastIncomeSync: serverTimestamp()
                 });

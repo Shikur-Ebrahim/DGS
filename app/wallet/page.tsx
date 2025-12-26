@@ -118,8 +118,8 @@ export default function WalletPage() {
                                     <svg className="w-3 h-3 text-blue-500/40 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                                 </div>
                                 <p className="text-lg font-black text-white flex items-baseline gap-1">
+                                    <span className="text-lg text-blue-400 font-bold">$</span>
                                     {userData?.taskWallet !== undefined ? userData.taskWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
-                                    <span className="text-[10px] text-blue-400 font-bold">ETB</span>
                                 </p>
                             </div>
                         </div>

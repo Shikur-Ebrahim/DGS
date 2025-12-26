@@ -453,13 +453,13 @@ export default function TeamPage() {
 
                                     <div className="space-y-4">
                                         {[
-                                            { v: "V1", size: 10, assets: "30,000", salary: "1,000", income: "48,000" },
-                                            { v: "V2", size: 30, assets: "150,000", salary: "3,000", income: "144,000" },
-                                            { v: "V3", size: 60, assets: "500,000", salary: "6,000", income: "288,000" },
-                                            { v: "V4", size: 100, assets: "1,000,000", salary: "15,000", income: "720,000" },
-                                            { v: "V5", size: 180, assets: "2,500,000", salary: "40,000", income: "1,920,000" },
-                                            { v: "V6", size: 300, assets: "5,000,000", salary: "100,000", income: "4,800,000" },
-                                            { v: "V7", size: 500, assets: "10,000,000", salary: "800,000", income: "38,400,000" },
+                                            { v: "V1", size: 15, assets: "70,000", salary: "1,500", income: "72,000" },
+                                            { v: "V2", size: 40, assets: "300,000", salary: "4,000", income: "192,000" },
+                                            { v: "V3", size: 80, assets: "800,000", salary: "15,000", income: "720,000" },
+                                            { v: "V4", size: 150, assets: "1,500,000", salary: "30,000", income: "1,440,000" },
+                                            { v: "V5", size: 270, assets: "3,500,000", salary: "70,000", income: "3,360,000" },
+                                            { v: "V6", size: 400, assets: "8,000,000", salary: "350,000", income: "16,800,000" },
+                                            { v: "V7", size: 800, assets: "20,000,000", salary: "1,500,000", income: "72,000,000" },
                                         ].map((item, idx) => (
                                             <div key={idx} className="group relative overflow-hidden rounded-2xl bg-white/5 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 p-5">
                                                 <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -499,7 +499,7 @@ export default function TeamPage() {
                                         <div className="mt-6 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 text-center relative overflow-hidden">
                                             <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity"></div>
                                             <p className="text-xs text-amber-200/90 leading-relaxed relative z-10 font-medium">
-                                                After reaching <span className="font-black text-amber-400">V7</span>, you can also apply for the position of <span className="text-white font-bold">regional manager</span>, become the top management of CURS, and receive an annual dividend of no less than <span className="font-black text-amber-400 text-sm">5,000,000 Br</span>.
+                                                After reaching <span className="font-black text-amber-400">V7</span>, you can also apply for the position of <span className="text-white font-bold">regional manager</span>, become the top management of DGS, and receive an annual dividend of no less than <span className="font-black text-amber-400 text-sm">10,000,000 Br</span>.
                                             </p>
                                         </div>
                                     </div>
