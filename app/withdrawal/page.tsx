@@ -46,6 +46,15 @@ export default function WithdrawalPage() {
     // Notification State
     const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
+    // Withdrawal Rules
+    const [withdrawalRules, setWithdrawalRules] = useState<any>(null);
+    const [isRestricted, setIsRestricted] = useState(false);
+    const [restrictionReason, setRestrictionReason] = useState("");
+    const [totalRecharge, setTotalRecharge] = useState(0);
+    const [inviteRechargeTotal, setInviteRechargeTotal] = useState(0);
+    const [userProductIds, setUserProductIds] = useState<string[]>([]);
+    const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
+
     const FEE_PERCENT = 0.06; // 6% fee
 
     const showNotification = (message: string, type: 'success' | 'error') => {
@@ -89,6 +98,90 @@ export default function WithdrawalPage() {
         };
     }, [router]);
 
+    // Fetch withdrawal rules and user-specific data
+    useEffect(() => {
+        if (!user?.id) return;
+
+        // Fetch withdrawal rules
+        const fetchRules = async () => {
+            const rulesDoc = await getDoc(doc(db, "Settings", "withdrawalRules"));
+            if (rulesDoc.exists()) {
+                setWithdrawalRules(rulesDoc.data());
+            }
+        };
+        fetchRules();
+
+        // Check if user is restricted
+        const checkRestriction = async () => {
+            const restrictionDoc = await getDoc(doc(db, "WithdrawalRestrictions", user.id));
+            if (restrictionDoc.exists() && restrictionDoc.data().isRestricted) {
+                setIsRestricted(true);
+                setRestrictionReason(restrictionDoc.data().reason || "Your account is restricted from withdrawals.");
+            }
+        };
+        checkRestriction();
+
+        // Calculate total recharge
+        const qRecharge = query(
+            collection(db, "RechargeReview"),
+            where("userId", "==", user.id),
+            where("status", "==", "approved")
+        );
+        const unsubRecharge = onSnapshot(qRecharge, (snapshot) => {
+            const total = snapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().amount) || 0), 0);
+            setTotalRecharge(total);
+        });
+
+        // Count valid invites and calculate their total recharge
+        const qInvites = query(
+            collection(db, "Customers"),
+            where("inviterA", "==", user.id),
+            where("isValidMember", "==", true)
+        );
+        const unsubInvites = onSnapshot(qInvites, async (snapshot) => {
+            // Calculate total recharge from invited users
+            let totalInviteRecharge = 0;
+            for (const inviteDoc of snapshot.docs) {
+                const inviteUserId = inviteDoc.id;
+                const qInviteRecharge = query(
+                    collection(db, "RechargeReview"),
+                    where("userId", "==", inviteUserId),
+                    where("status", "==", "approved")
+                );
+                const inviteRechargeSnap = await getDocs(qInviteRecharge);
+                const inviteTotal = inviteRechargeSnap.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().amount) || 0), 0);
+                totalInviteRecharge += inviteTotal;
+            }
+            setInviteRechargeTotal(totalInviteRecharge);
+        });
+
+        return () => {
+            unsubRecharge();
+            unsubInvites();
+        };
+    }, [user?.id]);
+
+    // Fetch user's purchased products
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const fetchUserProducts = async () => {
+            const qOrders = query(
+                collection(db, "UserOrders"),
+                where("userId", "==", user.id)
+            );
+            const ordersSnap = await getDocs(qOrders);
+
+            // Get unique product IDs
+            const productIds = [...new Set(ordersSnap.docs.map(doc => doc.data().productId))];
+            setUserProductIds(productIds as string[]);
+
+            // Check if user has purchased at least one product
+            setHasPurchasedProduct(ordersSnap.docs.length > 0);
+        };
+        fetchUserProducts();
+    }, [user?.id]);
+
     // Auto-fill account details when bank is selected
     useEffect(() => {
         if (selectedBank && user) {
@@ -114,21 +207,68 @@ export default function WithdrawalPage() {
     }, [selectedBank, user]);
 
     const handleWithdrawClick = () => {
+        // Check if user has purchased a product
+        if (!hasPurchasedProduct) {
+            showNotification(t.dashboard.mustPurchaseProduct, "error");
+            return;
+        }
+
         if (!amount || parseFloat(amount) <= 0) {
-            showNotification("Please enter a valid amount", "error");
+            showNotification(t.dashboard.validAmount, "error");
             return;
         }
         if (parseFloat(amount) > (user?.balanceWallet || 0)) {
-            showNotification("Insufficient balance!", "error");
+            showNotification(t.dashboard.insufficientBalance, "error");
             return;
         }
         if (parseFloat(amount) < 300 || parseFloat(amount) > 40000) {
-            showNotification("Withdrawal range is 300 - 40000 Br", "error");
+            showNotification(t.dashboard.withdrawRange, "error");
             return;
         }
         if (!selectedBank || !accountNumber || !accountHolderName) {
-            showNotification("Please select/fill bank details", "error");
+            showNotification(t.dashboard.fillBankDetails, "error");
             return;
+        }
+
+        // Check if user is restricted
+        if (isRestricted) {
+            showNotification(restrictionReason, "error");
+            return;
+        }
+
+        // Validate against withdrawal rules
+        if (withdrawalRules) {
+            const withdrawAmount = parseFloat(amount);
+            const maxAllowedPercent = totalRecharge * (withdrawalRules.maxWithdrawalPercent / 100);
+
+            // Find matching product rules for user's purchased products
+            const productRules = withdrawalRules.productRules || [];
+            const matchingRules = productRules.filter((rule: any) =>
+                userProductIds.includes(rule.productId)
+            );
+
+            // Get the highest invite recharge requirement from matching products
+            const requiredInviteRecharge = matchingRules.length > 0
+                ? Math.max(...matchingRules.map((r: any) => r.inviteRechargeRequired))
+                : 0;
+
+            // Check if user has met invite recharge requirement
+            const hasMetInviteRequirement = requiredInviteRecharge === 0 || inviteRechargeTotal >= requiredInviteRecharge;
+
+            if (!hasMetInviteRequirement && withdrawAmount > maxAllowedPercent) {
+                // User hasn't met invite requirement and is trying to withdraw more than allowed percentage
+                const missingRecharge = Math.max(0, requiredInviteRecharge - inviteRechargeTotal);
+                const matchingProductNames = matchingRules.map((r: any) => r.productName).join(", ");
+
+                let message = withdrawalRules.customMessage || "You need more recharge from invited users to unlock full withdrawal.";
+                message += `\n\nCurrent Status:\n`;
+                message += `• Your Products: ${matchingProductNames || "None"}\n`;
+                message += `• Max Withdrawal: ${withdrawalRules.maxWithdrawalPercent}% of ${totalRecharge.toFixed(2)} ETB = ${maxAllowedPercent.toFixed(2)} ETB\n`;
+                message += `• Invite Recharge: ${inviteRechargeTotal.toFixed(2)} ETB / ${requiredInviteRecharge} ETB${missingRecharge > 0 ? ` (Need ${missingRecharge.toFixed(2)} ETB more)` : ' ✓ Unlimited!'}`;
+
+                showNotification(message, "error");
+                return;
+            }
         }
 
         setShowPasswordModal(true);
@@ -136,7 +276,7 @@ export default function WithdrawalPage() {
 
     const handlePasswordSubmit = async () => {
         if (!withdrawalPassword || withdrawalPassword.length < 4) {
-            showNotification("Invalid password", "error");
+            showNotification(t.dashboard.invalidPassword, "error");
             return;
         }
 
@@ -150,7 +290,7 @@ export default function WithdrawalPage() {
             if (!hasSetPassword) {
                 // Set first time
                 if (withdrawalPassword !== confirmPassword) {
-                    showNotification("Passwords do not match", "error");
+                    showNotification(t.dashboard.passwordMismatch, "error");
                     setIsSubmitting(false);
                     return;
                 }
@@ -160,7 +300,7 @@ export default function WithdrawalPage() {
                 // Verify
                 const pwdSnap = await getDoc(pwdRef);
                 if (pwdSnap.data()?.password !== withdrawalPassword) {
-                    showNotification("withdrawal code is incorrect", "error");
+                    showNotification(t.dashboard.withdrawCodeIncorrect, "error");
                     setIsSubmitting(false);
                     return;
                 }
@@ -211,7 +351,7 @@ export default function WithdrawalPage() {
                 }, { merge: true });
             });
 
-            showNotification("Withdrawal request submitted! ✅", "success");
+            showNotification(t.dashboard.withdrawRequestSubmitted, "success");
             setShowPasswordModal(false);
             setAmount("");
             setWithdrawalPassword("");
@@ -220,9 +360,9 @@ export default function WithdrawalPage() {
         } catch (error: any) {
             console.error("Withdrawal error:", error);
             if (error.message === "INSUFFICIENT_FUNDS") {
-                showNotification("Insufficient balance!", "error");
+                showNotification(t.dashboard.insufficientBalance, "error");
             } else {
-                showNotification("Transaction failed. Try again.", "error");
+                showNotification(t.dashboard.transactionFailed, "error");
             }
         } finally {
             setIsSubmitting(false);
@@ -272,7 +412,7 @@ export default function WithdrawalPage() {
                             {t.dashboard.withdrawalAmount}:
                         </p>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black opacity-90 tracking-tighter">Br</span>
+                            <span className="text-4xl font-black opacity-90 tracking-tighter">{t.currencyBr}</span>
                             <input
                                 type="number"
                                 value={amount}
@@ -290,7 +430,7 @@ export default function WithdrawalPage() {
                     <div className="flex items-center justify-between">
                         <span className="text-gray-500 font-bold">{t.dashboard.availableBalance}</span>
                         <span className="bg-purple-100/50 text-purple-600 px-4 py-1.5 rounded-full font-black text-sm">
-                            {user?.balanceWallet?.toLocaleString() || 0} Br
+                            {user?.balanceWallet?.toLocaleString() || 0} {t.currencyBr}
                         </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -301,7 +441,7 @@ export default function WithdrawalPage() {
                         <span className="text-gray-800 font-black text-lg">{t.dashboard.actualReceiptLabel}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-white shadow-sm font-black">$</div>
-                            <span className="text-3xl font-black text-[#5D26C1] tracking-tighter">{actualReceipt} Br</span>
+                            <span className="text-3xl font-black text-[#5D26C1] tracking-tighter">{actualReceipt} {t.currencyBr}</span>
                         </div>
                     </div>
                 </div>
@@ -443,10 +583,10 @@ export default function WithdrawalPage() {
 
                             <div>
                                 <h1 className="text-2xl font-black text-gray-900 leading-none mb-1">
-                                    {hasSetPassword ? "Security Check" : "Set Secure Code"}
+                                    {hasSetPassword ? t.dashboard.securityCheck : t.dashboard.setSecureCode}
                                 </h1>
                                 <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-2 px-1">
-                                    {hasSetPassword ? "Enter your 4-digit code to authorize withdrawal" : "Create a 4-digit numeric code for future withdrawals"}
+                                    {hasSetPassword ? t.dashboard.enterCodeDesc : t.dashboard.setCodeDesc}
                                 </p>
                             </div>
 

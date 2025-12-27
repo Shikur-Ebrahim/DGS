@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Bank {
     id: string;
@@ -19,6 +20,7 @@ import { Suspense } from "react";
 
 function BankDetailsContent() {
     const router = useRouter();
+    const { t } = useLanguage();
     const searchParams = useSearchParams();
     const methodId = searchParams.get('method');
     const amount = searchParams.get('amount') || '0';
@@ -97,7 +99,7 @@ function BankDetailsContent() {
 
     const handleSubmit = async () => {
         if (!ftCode.trim() || !selectedBank) {
-            alert('Please enter the FT code');
+            alert(t.dashboard.enterFtCode);
             return;
         }
 
@@ -140,7 +142,7 @@ function BankDetailsContent() {
             router.push(`/recharge-review?amount=${amount}`);
         } catch (error) {
             console.error('Error submitting recharge:', error);
-            alert('Failed to submit. Please try again.');
+            alert(t.dashboard.failedToSubmit);
         } finally {
             setIsSubmitting(false);
         }

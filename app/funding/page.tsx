@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 export default function FundingPage() {
     const router = useRouter();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
@@ -40,7 +44,7 @@ export default function FundingPage() {
     }, [router]);
 
     const formatDate = (timestamp: any) => {
-        if (!timestamp) return "N/A";
+        if (!timestamp) return t.dashboard.notAvailable;
         const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
         return date.toLocaleDateString('en-GB', {
             day: '2-digit',
@@ -61,14 +65,14 @@ export default function FundingPage() {
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-wide uppercase">Funding Tracker</h2>
+                <h2 className="text-xl font-black text-white tracking-wide uppercase">{t.dashboard.fundingTracker}</h2>
             </div>
 
             <div className="p-5 pb-32 max-w-2xl mx-auto space-y-6">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 space-y-4">
                         <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Synchronizing accounts...</p>
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">{t.dashboard.syncingAccounts}</p>
                     </div>
                 ) : orders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
@@ -78,14 +82,14 @@ export default function FundingPage() {
                             </svg>
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-xl font-black text-gray-400">No Active Funding</h3>
-                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">Start investing to track your assets</p>
+                            <h3 className="text-xl font-black text-gray-400">{t.dashboard.noFunding}</h3>
+                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">{t.dashboard.startInvestingDesc}</p>
                         </div>
                         <button
                             onClick={() => router.push('/product')}
                             className="px-8 py-3 bg-blue-600 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
                         >
-                            Explore Products
+                            {t.dashboard.exploreProducts}
                         </button>
                     </div>
                 ) : (
@@ -117,12 +121,12 @@ export default function FundingPage() {
                                 {/* Key Stats Grid */}
                                 <div className="grid grid-cols-2 gap-4 mb-8">
                                     <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 group-hover:bg-white/[0.05] transition-colors">
-                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Total Profit</p>
-                                        <p className="text-xl font-black text-emerald-400">+{order.totalProfit.toLocaleString()} ETB</p>
+                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{t.dashboard.totalProfit}</p>
+                                        <p className="text-xl font-black text-emerald-400">+{order.totalProfit.toLocaleString()} {t.dashboard.currencyEtb}</p>
                                     </div>
                                     <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 group-hover:bg-white/[0.05] transition-colors">
-                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Principal Income</p>
-                                        <p className="text-xl font-black text-blue-400">{order.principalIncome.toLocaleString()} ETB</p>
+                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{t.dashboard.principalIncome}</p>
+                                        <p className="text-xl font-black text-blue-400">{order.principalIncome.toLocaleString()} {t.dashboard.currencyEtb}</p>
                                     </div>
                                 </div>
 
@@ -130,8 +134,8 @@ export default function FundingPage() {
                                 <div className="space-y-4 mb-8">
                                     <div className="flex justify-between items-end">
                                         <div>
-                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Timeline Progress</p>
-                                            <p className="text-sm font-black text-white">{order.contractPeriod - order.remainingDays} / {order.contractPeriod} Days Collected</p>
+                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">{t.dashboard.timelineProgress}</p>
+                                            <p className="text-sm font-black text-white">{order.contractPeriod - order.remainingDays} / {order.contractPeriod} {t.dashboard.daysCollected}</p>
                                         </div>
                                         <p className="text-xl font-black text-white/40">{Math.round(((order.contractPeriod - order.remainingDays) / order.contractPeriod) * 100)}%</p>
                                     </div>
@@ -146,19 +150,19 @@ export default function FundingPage() {
                                 {/* Footer Data Grid */}
                                 <div className="grid grid-cols-2 gap-y-6 pt-6 border-t border-white/5 px-2">
                                     <div>
-                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Daily Yield</p>
-                                        <p className="text-sm font-black text-emerald-400/90 tracking-tight">{order.dailyIncome.toLocaleString()} ETB / Day</p>
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">{t.dashboard.dailyYield}</p>
+                                        <p className="text-sm font-black text-emerald-400/90 tracking-tight">{order.dailyIncome.toLocaleString()} {t.dashboard.currencyEtb} / {t.dashboard.dayUnit}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Initial Stake</p>
-                                        <p className="text-sm font-black text-white/90 tracking-tight">{order.price.toLocaleString()} ETB</p>
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">{t.dashboard.initialStake}</p>
+                                        <p className="text-sm font-black text-white/90 tracking-tight">{order.price.toLocaleString()} {t.dashboard.currencyEtb}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Purchase Date</p>
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">{t.dashboard.purchaseDate}</p>
                                         <p className="text-[11px] font-bold text-gray-400">{formatDate(order.purchaseDate)}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Latest Sync</p>
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">{t.dashboard.latestSync}</p>
                                         <p className="text-[11px] font-bold text-blue-400/60">{formatDate(order.lastIncomeSync)}</p>
                                     </div>
                                 </div>

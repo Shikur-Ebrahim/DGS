@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function InvitationRulesPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -14,10 +16,10 @@ export default function InvitationRulesPage() {
     if (!mounted) return null;
 
     const levels = [
-        { level: "Level 1", who: "Direct invites", reward: "10%" },
-        { level: "Level 2", who: "Invited by Level 1", reward: "5%" },
-        { level: "Level 3", who: "Invited by Level 2", reward: "3%" },
-        { level: "Level 4", who: "Invited by Level 3", reward: "2%" },
+        { level: `${t.dashboard.levelLabel} 1`, who: t.dashboard.directInvites, reward: "10%" },
+        { level: `${t.dashboard.levelLabel} 2`, who: t.dashboard.invitedByLevel1, reward: "5%" },
+        { level: `${t.dashboard.levelLabel} 3`, who: t.dashboard.invitedByLevel2, reward: "3%" },
+        { level: `${t.dashboard.levelLabel} 4`, who: t.dashboard.invitedByLevel3, reward: "2%" },
     ];
 
     return (
@@ -38,7 +40,7 @@ export default function InvitationRulesPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-widest uppercase italic">Invitation Rules</h2>
+                <h2 className="text-xl font-black text-white tracking-widest uppercase italic">{t.dashboard.invitationRules}</h2>
             </div>
 
             <div className="p-6 max-w-2xl mx-auto space-y-8 pb-32 animate-fade-in">
@@ -49,21 +51,20 @@ export default function InvitationRulesPage() {
                         <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/20">
                             <span className="text-xl">🔗</span>
                         </div>
-                        <h3 className="text-xl font-black tracking-tight text-white/90">Invitation Levels & Rewards</h3>
+                        <h3 className="text-xl font-black tracking-tight text-white/90">{t.dashboard.invitationLevelsRewards}</h3>
                     </div>
 
                     <p className="text-gray-400 text-sm leading-relaxed font-medium px-1">
-                        When you invite someone to join the app, you earn coins based on how deep your invitation network goes.
-                        Rewards are only given up to the <span className="text-purple-400 font-bold">4th level</span>.
+                        {t.dashboard.invitationDesc}
                     </p>
 
                     <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm shadow-2xl">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white/5">
-                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Level</th>
-                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Beneficiary</th>
-                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Reward</th>
+                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500">{t.dashboard.levelLabel}</th>
+                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500">{t.dashboard.beneficiaryLabel}</th>
+                                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">{t.dashboard.rewardLabel}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -81,7 +82,7 @@ export default function InvitationRulesPage() {
                     <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
                         <span className="text-xl mt-0.5">🚫</span>
                         <p className="text-xs font-bold text-amber-500/80 leading-relaxed uppercase tracking-wide">
-                            No rewards are given beyond the 4th level. This means the invitation chain automatically stops, keeping the system balanced and non-exploitative.
+                            {t.dashboard.noRewardsBeyond4th}
                         </p>
                     </div>
                 </section>
@@ -92,7 +93,7 @@ export default function InvitationRulesPage() {
                         <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/20">
                             <span className="text-xl">🪙</span>
                         </div>
-                        <h3 className="text-xl font-black tracking-tight text-white/90">Coin-Based Rewards Only</h3>
+                        <h3 className="text-xl font-black tracking-tight text-white/90">{t.dashboard.coinRewardsOnly}</h3>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
@@ -101,7 +102,7 @@ export default function InvitationRulesPage() {
                                 <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform">
                                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
-                                <p className="text-sm font-bold text-gray-400">All invitation rewards are paid only in <span className="text-white">app coins</span>.</p>
+                                <p className="text-sm font-bold text-gray-400">{t.dashboard.paidInAppCoins}</p>
                             </div>
                         </div>
 
@@ -110,7 +111,7 @@ export default function InvitationRulesPage() {
                                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
                                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                                 </div>
-                                <p className="text-sm font-bold text-gray-400">Coins are stored safely inside your <span className="text-white">app wallet</span>.</p>
+                                <p className="text-sm font-bold text-gray-400">{t.dashboard.storedInWallet}</p>
                             </div>
                         </div>
 
@@ -119,13 +120,13 @@ export default function InvitationRulesPage() {
                                 <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                                     <span className="text-2xl">❌</span>
                                 </div>
-                                <p className="text-sm font-bold text-rose-500/80 uppercase tracking-tight">Coins cannot be withdrawn directly.</p>
+                                <p className="text-sm font-bold text-rose-500/80 uppercase tracking-tight">{t.dashboard.cannotWithdrawDirectly}</p>
                             </div>
                         </div>
                     </div>
 
                     <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center pt-2">
-                        Maintaining Platform Stability & Long-term Value
+                        {t.dashboard.platformStability}
                     </p>
                 </section>
 
@@ -135,7 +136,7 @@ export default function InvitationRulesPage() {
                         <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/20">
                             <span className="text-xl">🔄</span>
                         </div>
-                        <h3 className="text-xl font-black tracking-tight text-white/90">Coin Exchange to Birr</h3>
+                        <h3 className="text-xl font-black tracking-tight text-white/90">{t.dashboard.coinExchangeBirr}</h3>
                     </div>
 
                     <div className="relative group p-8 rounded-[2.5rem] bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-white/5 overflow-hidden shadow-2xl">
@@ -145,21 +146,21 @@ export default function InvitationRulesPage() {
 
                         <div className="relative z-10 space-y-6">
                             <p className="text-gray-400 text-sm font-medium leading-relaxed">
-                                To convert coins into Birr, users must use the exchange feature:
+                                {t.dashboard.exchangeFeatureIntro}
                             </p>
 
                             <ul className="space-y-4">
                                 <li className="flex items-center gap-4">
                                     <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                    <p className="text-sm font-bold text-white">Coins must be exchanged before withdrawal</p>
+                                    <p className="text-sm font-bold text-white">{t.dashboard.mustExchangeBeforeWithdraw}</p>
                                 </li>
                                 <li className="flex items-center gap-4">
                                     <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                                    <p className="text-sm font-bold text-white">A <span className="text-rose-500">30% exchange fee</span> is applied during conversion</p>
+                                    <p className="text-sm font-bold text-white">{t.dashboard.exchangeFeeApplied}</p>
                                 </li>
                                 <li className="flex items-center gap-4">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                    <p className="text-sm font-bold text-white italic">The remaining balance can then be withdrawn as Birr</p>
+                                    <p className="text-sm font-bold text-white italic">{t.dashboard.remainingBalanceWithdrawn}</p>
                                 </li>
                             </ul>
 
@@ -171,7 +172,7 @@ export default function InvitationRulesPage() {
                                 <svg className="w-5 h-5 group-hover/btn:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
-                                Go to Exchange
+                                {t.dashboard.goToExchange}
                             </button>
                         </div>
                     </div>
@@ -182,7 +183,7 @@ export default function InvitationRulesPage() {
                     <div className="w-12 h-[1px] bg-white/20"></div>
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[8px] font-black text-gray-500 tracking-[0.4em] uppercase">Verified Rulebook v2.0</span>
+                        <span className="text-[8px] font-black text-gray-500 tracking-[0.4em] uppercase">{t.dashboard.verifiedRulebook}</span>
                     </div>
                 </div>
             </div>

@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ChangePasswordPage() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [oldPassword, setOldPassword] = useState("");
@@ -21,13 +23,13 @@ export default function ChangePasswordPage() {
         setIsLoading(true);
 
         if (newPassword !== confirmPassword) {
-            setError("New passwords do not match.");
+            setError(t.dashboard.passwordMismatchError);
             setIsLoading(false);
             return;
         }
 
         if (newPassword.length < 6) {
-            setError("Password must be at least 6 characters.");
+            setError(t.dashboard.passwordLengthError);
             setIsLoading(false);
             return;
         }
@@ -46,16 +48,16 @@ export default function ChangePasswordPage() {
 
             // Update password
             await updatePassword(user, newPassword);
-            setSuccess("Password updated successfully!");
+            setSuccess(t.dashboard.updatePasswordSuccess);
             setTimeout(() => router.back(), 2000);
         } catch (err: any) {
             console.error("Error changing password:", err);
             if (err.code === 'auth/wrong-password') {
-                setError("Incorrect old password.");
+                setError(t.dashboard.incorrectOldPasswordError);
             } else if (err.code === 'auth/requires-recent-login') {
-                setError("Please log out and log in again to change your password.");
+                setError(t.dashboard.requiresReloginError);
             } else {
-                setError("Failed to update password. Please try again.");
+                setError(t.dashboard.failedToUpdatePassword);
             }
         } finally {
             setIsLoading(false);
@@ -80,7 +82,7 @@ export default function ChangePasswordPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <h1 className="text-xl font-bold tracking-wide">Change Password</h1>
+                <h1 className="text-xl font-bold tracking-wide">{t.dashboard.changePasswordTitle}</h1>
             </div>
 
             {/* Content */}
@@ -88,7 +90,7 @@ export default function ChangePasswordPage() {
                 <div className="p-6 rounded-[2rem] bg-gradient-to-b from-[#1a1a1a]/80 to-[#0f0f0f]/90 backdrop-blur-xl border border-white/5 shadow-2xl">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">Old Password</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">{t.dashboard.oldPasswordLabel}</label>
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                                 <input
@@ -96,14 +98,14 @@ export default function ChangePasswordPage() {
                                     value={oldPassword}
                                     onChange={(e) => setOldPassword(e.target.value)}
                                     className="w-full bg-[#131313] border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 relative z-10 transition-all"
-                                    placeholder="Enter current password"
+                                    placeholder={t.dashboard.enterCurrentPassword}
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">New Password</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">{t.dashboard.newPasswordLabel}</label>
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-purple-500/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                                 <input
@@ -111,14 +113,14 @@ export default function ChangePasswordPage() {
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     className="w-full bg-[#131313] border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 relative z-10 transition-all"
-                                    placeholder="Enter new password"
+                                    placeholder={t.dashboard.enterNewPassword}
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">Confirm Password</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2">{t.dashboard.confirmPasswordLabel}</label>
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-indigo-500/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                                 <input
@@ -126,7 +128,7 @@ export default function ChangePasswordPage() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     className="w-full bg-[#131313] border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 relative z-10 transition-all"
-                                    placeholder="Confirm new password"
+                                    placeholder={t.dashboard.confirmNewPassword}
                                     required
                                 />
                             </div>
@@ -148,11 +150,11 @@ export default function ChangePasswordPage() {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-lg transition-all active:scale-[0.98] ${isLoading
-                                    ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-                                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
+                                ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
                                 }`}
                         >
-                            {isLoading ? "Updating..." : "Update Password"}
+                            {isLoading ? t.dashboard.updatingBtn : t.dashboard.updatePasswordBtn}
                         </button>
                     </form>
                 </div>

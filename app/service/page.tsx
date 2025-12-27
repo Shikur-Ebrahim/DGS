@@ -1,49 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ServicePage() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+    const [telegramSettings, setTelegramSettings] = useState<any>({
+        channelUser: "",
+        channelDesc: t.dashboard.telegramChannelDesc,
+        supportUser: "",
+        supportDesc: t.dashboard.telegramSupportDesc
+    });
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const docRef = doc(db, "Settings", "telegram");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setTelegramSettings(prev => ({ ...prev, ...docSnap.data() }));
+                }
+            } catch (error) {
+                console.error("Error fetching telegram settings:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    // We need to add imports to the top of the file first.
+    // Let me rewrite the component with imports included to be safe.
+
+    // Actually, I can just use the existing supportChannels structure but update it with state.
+
     const supportChannels = [
         {
-            name: "Telegram Support",
-            description: "Instant help from our global team",
+            name: t.dashboard.telegramChannelName,
+            description: telegramSettings.channelDesc,
             icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.08-.66.02-.18.27-.36.74-.55 2.91-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12a.4.4 0 01.12.28c0 .08-.01.17-.03.26z",
             color: "from-blue-400 to-blue-600",
-            link: "https://t.me/your_telegram"
+            link: telegramSettings.channelUser?.startsWith('http') ? telegramSettings.channelUser : `https://t.me/${telegramSettings.channelUser}`
         },
         {
-            name: "WhatsApp Hub",
-            description: "Direct chat with regional agents",
-            icon: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.441 5.631 1.442h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z",
-            color: "from-emerald-400 to-emerald-600",
-            link: "https://wa.me/your_number"
+            name: t.dashboard.telegramSupportName,
+            description: telegramSettings.supportDesc,
+            icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.08-.66.02-.18.27-.36.74-.55 2.91-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12a.4.4 0 01.12.28c0 .08-.01.17-.03.26z",
+            link: telegramSettings.supportUser?.startsWith('http') ? telegramSettings.supportUser : `https://t.me/${telegramSettings.supportUser}`
         }
     ];
 
     const faqs = [
         {
-            q: "How long do withdrawals take?",
-            a: "Withdrawals typically arrive in 2-72 hours. Processing happens Monday-Friday during business hours (8 AM - 5 PM).",
+            q: t.dashboard.faq1Q,
+            a: t.dashboard.faq1A,
             id: 1
         },
         {
-            q: "What is the minimum recharge?",
-            a: "The minimum recharge amount is 300 ETB. Funds are credited instantly to your Balance Wallet upon manual verification of your transfer.",
+            q: t.dashboard.faq2Q,
+            a: t.dashboard.faq2A,
             id: 2
         },
         {
-            q: "Is my bank data secure?",
-            a: "Yes, we use 256-bit AES encryption for all banking data. Your personal details are only used for transaction processing and are never shared.",
+            q: t.dashboard.faq3Q,
+            a: t.dashboard.faq3A,
             id: 3
         },
         {
-            q: "How do I earn daily income?",
-            a: "Simply purchase a product from the home screen. Your income will be automatically generated and can be synced daily through the Funding Details page.",
+            q: t.dashboard.faq4Q,
+            a: t.dashboard.faq4A,
             id: 4
         }
     ];
@@ -58,7 +88,7 @@ export default function ServicePage() {
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-wide uppercase">Service Hub</h2>
+                <h2 className="text-xl font-black text-white tracking-wide uppercase">{t.dashboard.serviceHubTitle}</h2>
             </div>
 
             <div className="p-6 pb-32 max-w-2xl mx-auto space-y-10 pt-10">
@@ -69,8 +99,8 @@ export default function ServicePage() {
                         <Image src="/service_icon.png" alt="Service" width={128} height={128} className="relative z-10 drop-shadow-2xl" />
                     </div>
                     <div className="space-y-2">
-                        <h1 className="text-3xl font-black tracking-tighter">Support & Safety</h1>
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] px-4">Available 24/7 to secure your digital assets</p>
+                        <h1 className="text-3xl font-black tracking-tighter">{t.dashboard.supportSafety}</h1>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] px-4">{t.dashboard.available247Desc}</p>
                     </div>
                 </div>
 
@@ -79,22 +109,47 @@ export default function ServicePage() {
                     <div className="bg-[#111111] border border-white/5 rounded-3xl p-5 flex flex-col items-center gap-2">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Network Online</span>
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{t.dashboard.networkOnline}</span>
                         </div>
-                        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest text-center">Avg Response: 2 mins</p>
+                        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest text-center">{t.dashboard.avgResponse2min}</p>
                     </div>
                     <div className="bg-[#111111] border border-white/5 rounded-3xl p-5 flex flex-col items-center gap-2">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Encryption Active</span>
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{t.dashboard.encryptionActive}</span>
                         </div>
-                        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest text-center">DGS-SECURE v4.2</p>
+                        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest text-center">{t.dashboard.dgsSecureVersion}</p>
                     </div>
+                </div>
+
+                {/* Communicate Official Company */}
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em] ml-2">{t.dashboard.officialSupportLabel}</label>
+                    <a
+                        href="/chat"
+                        className="group relative bg-gradient-to-r from-[#111111] to-[#1a1a1a] border border-white/5 hover:border-blue-500/30 p-6 rounded-[2.5rem] flex items-center justify-between transition-all hover:-translate-y-1 shadow-2xl"
+                    >
+                        <div className="absolute inset-0 bg-blue-500/5 rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex items-center gap-5 relative z-10">
+                            <div className="w-16 h-16 rounded-2xl bg-[#0a0a0a] border border-white/5 flex items-center justify-center shadow-lg p-2 group-hover:scale-105 transition-transform">
+                                <Image src="/dgs_app_icon.png" alt="Official" width={48} height={48} className="object-contain" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-white tracking-tight">{t.dashboard.communicateOfficial}</h3>
+                                <p className="text-[11px] font-bold text-blue-400">{t.dashboard.premiumLiveSupport}</p>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 text-blue-500 group-hover:text-white transition-all">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                    </a>
                 </div>
 
                 {/* Social Channels */}
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em] ml-2">Direct Channels</label>
+                    <label className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em] ml-2">{t.dashboard.directChannelsLabel}</label>
                     <div className="grid gap-4">
                         {supportChannels.map((channel, i) => (
                             <a
@@ -126,9 +181,10 @@ export default function ServicePage() {
                     </div>
                 </div>
 
+
                 {/* FAQ Section */}
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em] ml-2">Frequent Questions</label>
+                    <label className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em] ml-2">{t.dashboard.frequentQuestionsLabel}</label>
                     <div className="space-y-3">
                         {faqs.map((faq) => (
                             <div
@@ -168,7 +224,7 @@ export default function ServicePage() {
                             <span className="text-lg font-black tracking-tighter">AES-256</span>
                         </div>
                     </div>
-                    <p className="text-[9px] font-bold text-gray-700 uppercase tracking-[0.4em]">Designed & Secured by Lumio Global Dynamics</p>
+                    <p className="text-[9px] font-bold text-gray-700 uppercase tracking-[0.4em]">{t.dashboard.designedSecuredBy}</p>
                 </div>
             </div>
         </div>

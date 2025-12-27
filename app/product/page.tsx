@@ -12,7 +12,7 @@ export default function ProductPage() {
     const { t } = useLanguage();
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("GDS");
+    const [activeTab, setActiveTab] = useState("DGS");
 
     useEffect(() => {
         const q = query(collection(db, "Products"), orderBy("createdAt", "desc"));
@@ -28,7 +28,7 @@ export default function ProductPage() {
         return () => unsubscribe();
     }, []);
 
-    const tabs = ["GDS", "VIP", "Limited"];
+    const tabs = ["DGS", "VIP", "Limited"];
 
     if (loading) {
         return (
@@ -124,7 +124,10 @@ export default function ProductPage() {
 
                 {/* Products List */}
                 <div className="grid grid-cols-1 gap-6 pb-12">
-                    {products.length === 0 ? (
+                    {products.filter(p => {
+                        const cat = p.category || "DGS"; // Default to DGS if missing
+                        return cat === activeTab;
+                    }).length === 0 ? (
                         <div className="py-20 flex flex-col items-center justify-center text-gray-500 gap-4">
                             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5 border-dashed border-2">
                                 <svg className="w-8 h-8 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +137,10 @@ export default function ProductPage() {
                             <p className="font-bold tracking-widest uppercase text-xs">{t.dashboard.noProducts}</p>
                         </div>
                     ) : (
-                        products.map((product) => (
+                        products.filter(p => {
+                            const cat = p.category || "DGS";
+                            return cat === activeTab;
+                        }).map((product) => (
                             <div key={product.id} className="relative group perspective">
                                 <div className="absolute inset-0 bg-blue-600/5 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                                 <div className="relative bg-[#141414]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] p-5 hover:border-blue-500/30 transition-all duration-500 hover:translate-y-[-4px] shadow-2xl">

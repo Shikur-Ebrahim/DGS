@@ -123,20 +123,39 @@ export default function DownloadPage() {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-6 animate-slide-up">
-                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-2xl shadow-emerald-500/20 border border-emerald-500/20">
+                        <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 shadow-2xl shadow-amber-500/20 border border-amber-500/20">
                             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <div className="text-center">
-                            <h3 className="text-2xl font-black tracking-tight">Downloaded!</h3>
-                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Installation complete</p>
+                        <div className="text-center space-y-4">
+                            <h3 className="text-2xl font-black tracking-tight text-amber-500">Device Warning</h3>
+
+                            <div className="relative w-48 h-48 mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                                <Image
+                                    src="/falcon.jpg"
+                                    alt="Falcon Supernova iPhone 6"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
+                                <p className="text-white font-bold text-sm leading-relaxed">
+                                    Limited capacity to run the app in the given mobile phone.
+                                </p>
+                            </div>
+
+                            <p className="text-gray-400 text-xs font-bold uppercase tracking-wide leading-relaxed px-4">
+                                This application is optimized to work only for <br />
+                                <span className="text-pink-400 font-black">"Falcon Supernova iPhone 6 Pink Diamond"</span>
+                            </p>
                         </div>
                         <button
                             onClick={() => router.push('/welcome')}
-                            className="text-blue-400 font-black uppercase tracking-widest text-[11px] hover:underline mt-2"
+                            className="text-white/40 font-black uppercase tracking-widest text-[10px] hover:text-white transition-colors mt-4"
                         >
-                            Return to Dashboard
+                            Back to Safety
                         </button>
                     </div>
                 )}

@@ -45,7 +45,7 @@ export default function RechargePage() {
                 <div className="bg-[#4a00b3] rounded-2xl p-6 shadow-xl shadow-purple-900/20">
                     <p className="text-purple-200 text-sm font-medium mb-2">{t.dashboard.rechargeAmountLabel}:</p>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-white">Br</span>
+                        <span className="text-3xl font-bold text-white">{t.currencyBr}</span>
                         <span className="text-5xl font-black text-white tracking-tight">{amount.toLocaleString()}</span>
                     </div>
                     <div className="h-0.5 w-full bg-white/20 mt-4"></div>
@@ -65,7 +65,7 @@ export default function RechargePage() {
                                 }
                             `}
                         >
-                            {val} Br
+                            {val} {t.currencyBr}
                         </button>
                     ))}
                 </div>

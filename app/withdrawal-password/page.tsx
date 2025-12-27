@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function WithdrawalPasswordPage() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,12 +44,12 @@ export default function WithdrawalPasswordPage() {
         e.preventDefault();
 
         if (newPassword.length < 4) {
-            showNotification("Password must be at least 4 digits", "error");
+            showNotification(t.dashboard.passwordAtLeast4, "error");
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            showNotification("Passwords do not match", "error");
+            showNotification(t.dashboard.passwordMismatch, "error");
             return;
         }
 
@@ -62,7 +64,7 @@ export default function WithdrawalPasswordPage() {
             if (hasSetPassword) {
                 const pwdSnap = await getDoc(pwdRef);
                 if (pwdSnap.data()?.password !== oldPassword) {
-                    showNotification("Current withdrawal password is incorrect", "error");
+                    showNotification(t.dashboard.currentPasswordIncorrect, "error");
                     setIsSubmitting(false);
                     return;
                 }
@@ -75,10 +77,10 @@ export default function WithdrawalPasswordPage() {
                 createdAt: createdAt
             });
 
-            showNotification("Withdrawal password updated! ✅", "success");
+            showNotification(t.dashboard.passwordUpdated, "success");
             setTimeout(() => router.push("/profile"), 2000);
         } catch (error: any) {
-            showNotification("Failed to update password. Try again.", "error");
+            showNotification(t.dashboard.failedToUpdatePassword, "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -99,7 +101,7 @@ export default function WithdrawalPasswordPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <h1 className="flex-1 text-center text-xl font-black text-gray-900 -ml-10">Security Password</h1>
+                <h1 className="flex-1 text-center text-xl font-black text-gray-900 -ml-10">{t.dashboard.securityPasswordTitle}</h1>
             </div>
 
             {/* Notification */}
@@ -121,14 +123,14 @@ export default function WithdrawalPasswordPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Withdrawal Code</h2>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Manage your secure transaction pin</p>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">{t.dashboard.withdrawalCodeTitle}</h2>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">{t.dashboard.managePinSubtitle}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {hasSetPassword && (
                         <div className="space-y-2">
-                            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">Current Code</label>
+                            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">{t.dashboard.currentCodeLabel}</label>
                             <input
                                 type="password"
                                 required
@@ -142,7 +144,7 @@ export default function WithdrawalPasswordPage() {
                     )}
 
                     <div className="space-y-2">
-                        <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">New Secret Code</label>
+                        <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">{t.dashboard.newSecretCodeLabel}</label>
                         <input
                             type="password"
                             required
@@ -155,7 +157,7 @@ export default function WithdrawalPasswordPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">Confirm New Code</label>
+                        <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest ml-4">{t.dashboard.confirmNewCodeLabel}</label>
                         <input
                             type="password"
                             required
@@ -176,7 +178,7 @@ export default function WithdrawalPasswordPage() {
                             {isSubmitting ? (
                                 <div className="animate-spin h-6 w-6 border-4 border-white/30 border-t-white rounded-full"></div>
                             ) : (
-                                "Update Security Code"
+                                t.dashboard.updateSecurityCodeBtn
                             )}
                         </button>
                     </div>
@@ -185,10 +187,10 @@ export default function WithdrawalPasswordPage() {
                 <div className="bg-indigo-50/50 rounded-[2rem] p-6 border border-indigo-100/50">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[10px] font-black italic">i</div>
-                        <h4 className="font-black text-indigo-900 text-sm uppercase tracking-tight">Security Tip</h4>
+                        <h4 className="font-black text-indigo-900 text-sm uppercase tracking-tight">{t.dashboard.securityTipTitle}</h4>
                     </div>
                     <p className="text-xs font-bold text-indigo-600/70 leading-relaxed">
-                        Your withdrawal code is required for every payout request. Keep it secret and avoid using obvious sequences like "1234" or your birth year.
+                        {t.dashboard.securityTipDesc}
                     </p>
                 </div>
             </div>

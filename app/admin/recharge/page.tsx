@@ -24,7 +24,7 @@ interface RechargeRequest {
 export default function AdminRechargePage() {
     const router = useRouter();
     const [isChecking, setIsChecking] = useState(true);
-    const [pendingRequests, setPendingRequests] = useState<RechargeRequest[]>([]);
+    const [requests, setRequests] = useState<RechargeRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -51,7 +51,8 @@ export default function AdminRechargePage() {
         if (!isChecking) {
             const q = query(
                 collection(db, "RechargeReview"),
-                where("status", "==", "pending")
+
+                where("status", "in", ["pending", "approved"])
             );
 
             const unsubscribe = onSnapshot(q, (snapshot: any) => {
@@ -63,7 +64,7 @@ export default function AdminRechargePage() {
                 // Sort by createdAt (newest first)
                 requests.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-                setPendingRequests(requests);
+                setRequests(requests);
                 setIsLoading(false);
             });
 
@@ -94,7 +95,8 @@ export default function AdminRechargePage() {
 
                 // Update customer's balance
                 await updateDoc(doc(db, "Customers", customerDoc.id), {
-                    balanceWallet: newBalance
+                    balanceWallet: newBalance,
+                    isValidMember: true
                 });
 
                 // Update status to 'approved' so it leaves the pending list immediately
@@ -103,17 +105,7 @@ export default function AdminRechargePage() {
                     approvedAt: new Date().toISOString()
                 });
 
-                console.log(`Approved recharge for ${request.phoneNumber}: ${rechargeAmount} Br added to balance. Document will be deleted in 10 seconds.`);
-
-                // Delete the recharge request document after 10 seconds
-                setTimeout(async () => {
-                    try {
-                        await deleteDoc(doc(db, "RechargeReview", request.id));
-                        console.log(`Document ${request.id} deleted from RechargeReview.`);
-                    } catch (err) {
-                        console.error("Error deleting document after delay:", err);
-                    }
-                }, 10000);
+                console.log(`Approved recharge for ${request.phoneNumber}: ${rechargeAmount} Br added to balance.`);
             } else {
                 alert("Customer not found!");
             }
@@ -174,26 +166,26 @@ export default function AdminRechargePage() {
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
                         <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-                        <span className="text-sm font-bold text-blue-400">{pendingRequests.length} Pending</span>
+                        <span className="text-sm font-bold text-blue-400">{requests.filter(r => r.status === 'pending').length} Pending</span>
                     </div>
                 </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
-                {pendingRequests.length === 0 ? (
+                {requests.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
                             <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-400 mb-2">All Clear!</h3>
-                        <p className="text-gray-500">No pending recharge requests at the moment</p>
+                        <h3 className="text-xl font-bold text-gray-400 mb-2">No Requests Found</h3>
+                        <p className="text-gray-500">No recharge requests available</p>
                     </div>
                 ) : (
                     <div className="grid gap-4">
-                        {pendingRequests.map((request) => (
+                        {requests.map((request) => (
                             <div
                                 key={request.id}
                                 className="bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-blue-500/30 transition-all"
@@ -247,7 +239,14 @@ export default function AdminRechargePage() {
 
                                     {/* Right Side - Action Buttons */}
                                     <div className="lg:w-64">
-                                        {confirmingId === request.id ? (
+                                        {request.status === 'approved' ? (
+                                            <div className="w-full h-12 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-center gap-2">
+                                                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span className="font-bold text-green-500 uppercase tracking-wider text-sm">Approved</span>
+                                            </div>
+                                        ) : confirmingId === request.id ? (
                                             <div className="flex flex-col gap-2 animate-fade-in">
                                                 <p className="text-xs font-bold text-center uppercase tracking-widest mb-1">
                                                     Confirm {confirmAction}?

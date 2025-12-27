@@ -12,6 +12,7 @@ import Image from "next/image";
 import { syncUserIncome } from "@/lib/incomeService";
 import { useLanguage } from "@/lib/LanguageContext";
 import { languageNames, Language } from "@/lib/translations";
+import { checkAndPaySalary } from "@/lib/vipService";
 
 export default function WelcomePage() {
     const router = useRouter();
@@ -141,6 +142,14 @@ export default function WelcomePage() {
             if (unsubscribeDoc) unsubscribeDoc();
         };
     }, []);
+
+    // Check for Monthly Salary
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
+            checkAndPaySalary(user.uid);
+        }
+    }, [userData]);
 
     // Check for pending recharge requests
     useEffect(() => {

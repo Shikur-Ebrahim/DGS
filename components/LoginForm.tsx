@@ -62,7 +62,8 @@ export default function LoginForm({ }: LoginFormProps) {
             await loginWithPhone(rawPhoneNumber, password); // Pass raw number
 
             setTimeout(() => {
-                router.push("/welcome");
+                // Force hard navigation to ensure page loads correctly
+                window.location.href = "/welcome";
             }, 1000);
         } catch (err: any) {
             console.error(err);

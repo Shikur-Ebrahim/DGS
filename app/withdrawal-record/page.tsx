@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface WithdrawalRecord {
     id: string;
@@ -24,6 +26,8 @@ export default function WithdrawalRecordPage() {
     const router = useRouter();
     const [records, setRecords] = useState<WithdrawalRecord[]>([]);
     const [loading, setLoading] = useState(true);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged((user: any) => {
@@ -54,7 +58,7 @@ export default function WithdrawalRecordPage() {
     }, [router]);
 
     const formatDate = (timestamp: any) => {
-        if (!timestamp) return "N/A";
+        if (!timestamp) return t.dashboard.notAvailable;
         const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
         return date.toLocaleDateString('en-GB', {
             day: '2-digit',
@@ -84,14 +88,14 @@ export default function WithdrawalRecordPage() {
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-wide uppercase">Withdrawal Records</h2>
+                <h2 className="text-xl font-black text-white tracking-wide uppercase">{t.dashboard.withdrawalRecords}</h2>
             </div>
 
             <div className="p-5 pb-32 max-w-2xl mx-auto space-y-6">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 space-y-4">
                         <div className="animate-spin h-10 w-10 border-4 border-amber-500 border-t-transparent rounded-full"></div>
-                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Retrieving history...</p>
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">{t.dashboard.retrievingHistory}</p>
                     </div>
                 ) : records.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
@@ -101,14 +105,14 @@ export default function WithdrawalRecordPage() {
                             </svg>
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-xl font-black text-gray-400">No Payout Requests</h3>
-                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">Your total withdrawal history will appear here</p>
+                            <h3 className="text-xl font-black text-gray-400">{t.dashboard.noPayoutRequests}</h3>
+                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">{t.dashboard.withdrawalHistoryDesc}</p>
                         </div>
                         <button
                             onClick={() => router.push('/withdrawal')}
                             className="px-8 py-3 bg-amber-600 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 active:scale-95 transition-all text-white"
                         >
-                            Make Withdrawal
+                            {t.dashboard.makeWithdrawal}
                         </button>
                     </div>
                 ) : (
@@ -117,18 +121,18 @@ export default function WithdrawalRecordPage() {
                         <div className="grid grid-cols-2 gap-4 animate-slide-up-fade">
                             <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-[2rem] p-5 shadow-xl relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-                                <p className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest mb-1">Pending Sync</p>
+                                <p className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest mb-1">{t.dashboard.pendingSync}</p>
                                 <h4 className="text-2xl font-black text-white leading-none tracking-tighter">
                                     {records.filter((r: any) => r.status === 'pending').reduce((acc: any, curr: any) => acc + curr.amount, 0).toLocaleString()}
-                                    <span className="text-[10px] ml-1 opacity-40">ETB</span>
+                                    <span className="text-[10px] ml-1 opacity-40">{t.dashboard.currencyEtb}</span>
                                 </h4>
                             </div>
                             <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-[2rem] p-5 shadow-xl relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-                                <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Finalized</p>
+                                <p className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">{t.dashboard.finalized}</p>
                                 <h4 className="text-2xl font-black text-white leading-none tracking-tighter">
                                     {records.filter((r: any) => r.status === 'approved').reduce((acc: any, curr: any) => acc + curr.amount, 0).toLocaleString()}
-                                    <span className="text-[10px] ml-1 opacity-40">ETB</span>
+                                    <span className="text-[10px] ml-1 opacity-40">{t.dashboard.currencyEtb}</span>
                                 </h4>
                             </div>
                         </div>
@@ -164,18 +168,18 @@ export default function WithdrawalRecordPage() {
                                         {/* Financial Summary Highlight */}
                                         <div className="bg-white/[0.03] border border-white/5 rounded-[2rem] p-6 mb-8 flex items-center justify-between group-hover:bg-white/[0.05] transition-all duration-500 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
                                             <div className="text-left">
-                                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Net to Receive</p>
+                                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">{t.dashboard.netToReceive}</p>
                                                 <div className="flex items-baseline gap-1.5">
                                                     <span className="text-3xl font-black text-white tracking-tighter drop-shadow-md">{record.actualReceipt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                    <span className="text-[10px] font-black text-amber-500/80 uppercase">ETB</span>
+                                                    <span className="text-[10px] font-black text-amber-500/80 uppercase">{t.dashboard.currencyEtb}</span>
                                                 </div>
                                             </div>
                                             <div className="h-10 w-[2px] bg-gradient-to-b from-transparent via-white/10 to-transparent mx-4"></div>
                                             <div className="text-right">
-                                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Gross Payout</p>
+                                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">{t.dashboard.grossPayout}</p>
                                                 <div className="flex items-baseline gap-1 justify-end">
                                                     <span className="text-xl font-bold text-gray-400 tracking-tighter">{record.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                    <span className="text-[9px] font-black text-gray-600 uppercase">ETB</span>
+                                                    <span className="text-[9px] font-black text-gray-600 uppercase">{t.dashboard.currencyEtb}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -183,19 +187,19 @@ export default function WithdrawalRecordPage() {
                                         {/* Detailed Data Matrix */}
                                         <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-2">
                                             <div className="space-y-1.5">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Account Holder</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.accountHolder}</p>
                                                 <p className="text-sm font-black text-white/90 truncate pr-2 tracking-tight">{record.accountHolderName}</p>
                                             </div>
                                             <div className="space-y-1.5 text-right">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Account Number</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.accountNumber}</p>
                                                 <p className="text-sm font-black text-white/90 font-mono tracking-[0.1em]">{record.accountNumber}</p>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Service Fee (6%)</p>
-                                                <p className="text-sm font-black text-rose-500/90 tracking-tight">-{record.fee.toLocaleString()} ETB</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.serviceFee}</p>
+                                                <p className="text-sm font-black text-rose-500/90 tracking-tight">-{record.fee.toLocaleString()} {t.dashboard.currencyEtb}</p>
                                             </div>
                                             <div className="space-y-1.5 text-right">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Customer Phone</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.customerPhone}</p>
                                                 <p className="text-sm font-black text-blue-400/90 font-mono">+{record.phoneNumber}</p>
                                             </div>
                                         </div>
@@ -207,7 +211,7 @@ export default function WithdrawalRecordPage() {
                                                 <span className="text-[8px] font-bold text-gray-500 tracking-[0.2em] uppercase">AuthID: {record.id.slice(0, 12).toUpperCase()}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
-                                                <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">Verified Payout</span>
+                                                <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">{t.dashboard.verifiedPayout}</span>
                                                 <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.9L9.03 9.152a2 2 0 001.938 0l6.865-4.252A2 2 0 0015.966 2H4.034a2 2 0 00-1.868 2.9zM3 14.5V8l7 4.333L17 8v6.5a2.5 2.5 0 01-2.5 2.5h-9A2.5 2.5 0 013 14.5z" clipRule="evenodd" /></svg>
                                             </div>
                                         </div>

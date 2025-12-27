@@ -139,6 +139,8 @@ export default function ProductManagementPage() {
                 dailyRate: parseFloat(((parseFloat(editingProduct.dailyIncome) / parseFloat(editingProduct.price)) * 100).toFixed(2)) || 0,
                 totalProfit: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod)).toFixed(2)) || 0,
                 principalIncome: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod) + parseFloat(editingProduct.price)).toFixed(2)) || 0,
+                principalIncome: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod) + parseFloat(editingProduct.price)).toFixed(2)) || 0,
+                category: editingProduct.category || "DGS",
                 updatedAt: new Date().toISOString()
             };
 
@@ -267,6 +269,32 @@ export default function ProductManagementPage() {
                                 </div>
                             </div>
 
+
+                            {/* Category Selection */}
+                            <div className="bg-black/20 rounded-2xl p-4 border border-white/5">
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Category</label>
+                                <div className="flex gap-2">
+                                    {["DGS", "VIP", "Limited"].map((cat) => (
+                                        <label key={cat} className={`flex-1 cursor-pointer`}>
+                                            <input
+                                                type="radio"
+                                                name="editCategory"
+                                                value={cat}
+                                                checked={(editingProduct.category || "DGS") === cat}
+                                                onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                                                className="hidden"
+                                            />
+                                            <div className={`text-center py-2 rounded-lg border transition-all text-sm font-bold ${(editingProduct.category || "DGS") === cat
+                                                ? "bg-blue-600 border-blue-500 text-white"
+                                                : "bg-[#141414] border-white/10 text-gray-400 hover:bg-white/5"
+                                                }`}>
+                                                {cat}
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2 space-y-2">
                                     <label className="text-xs font-black text-gray-500 uppercase tracking-widest pl-2">Product Name</label>
@@ -304,8 +332,9 @@ export default function ProductManagementPage() {
                             </button>
                         </form>
                     </div>
-                </div>
-            )}
-        </div>
+                </div >
+            )
+            }
+        </div >
     );
 }

@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 export default function RechargeRecordPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = translations[language];
     const [records, setRecords] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -40,9 +44,9 @@ export default function RechargeRecordPage() {
     }, [router]);
 
     const formatDate = (timestamp: any) => {
-        if (!timestamp) return "N/A";
+        if (!timestamp) return t.dashboard.notAvailable;
         const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('en-GB', {
+        return date.toLocaleDateString(language === 'en' ? 'en-GB' : language, {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
@@ -60,6 +64,15 @@ export default function RechargeRecordPage() {
         }
     };
 
+    const getStatusText = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case 'pending': return t.dashboard.statusPending;
+            case 'approved': return t.dashboard.statusApproved;
+            case 'rejected': return t.dashboard.statusRejected;
+            default: return status;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
             {/* Header */}
@@ -70,14 +83,14 @@ export default function RechargeRecordPage() {
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-wide uppercase">Recharge Records</h2>
+                <h2 className="text-xl font-black text-white tracking-wide uppercase">{t.dashboard.rechargeRecordTitle}</h2>
             </div>
 
             <div className="p-5 pb-32 max-w-2xl mx-auto space-y-6">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 space-y-4">
                         <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Retrieving history...</p>
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">{t.dashboard.retrievingHistory}</p>
                     </div>
                 ) : records.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
@@ -85,14 +98,14 @@ export default function RechargeRecordPage() {
                             DGS
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-xl font-black text-gray-400">No Recharge History</h3>
-                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">Deposit funds to see your record here</p>
+                            <h3 className="text-xl font-black text-gray-400">{t.dashboard.noRechargeHistory}</h3>
+                            <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">{t.dashboard.depositFundsDesc}</p>
                         </div>
                         <button
                             onClick={() => router.push('/recharge')}
                             className="px-8 py-3 bg-blue-600 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all text-white"
                         >
-                            Recharge Now
+                            {t.dashboard.rechargeNowBtn}
                         </button>
                     </div>
                 ) : (
@@ -100,10 +113,10 @@ export default function RechargeRecordPage() {
                         {/* Summary Bar */}
                         <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-[2.5rem] p-6 shadow-2xl flex items-center justify-between animate-slide-up-fade">
                             <div>
-                                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Lifetime Top-up</p>
+                                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">{t.dashboard.lifetimeTopUp}</p>
                                 <h4 className="text-3xl font-black text-white tracking-tighter">
                                     {records.filter((r: any) => r.status === 'approved').reduce((acc: any, curr: any) => acc + (Number(curr.amount) || 0), 0).toLocaleString()}
-                                    <span className="text-xs ml-1.5 text-blue-500/60 uppercase">ETB</span>
+                                    <span className="text-xs ml-1.5 text-blue-500/60 uppercase">{t.dashboard.currencyEtb}</span>
                                 </h4>
                             </div>
                             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
@@ -129,39 +142,39 @@ export default function RechargeRecordPage() {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-black text-white leading-tight mb-0.5 tracking-tight flex items-center gap-2">
-                                                        Top-up Amount
+                                                        {t.dashboard.rechargeAmountLabel}
                                                     </h3>
                                                     <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{formatDate(record.createdAt)}</p>
                                                 </div>
                                             </div>
                                             <div className={`px-4 py-2 rounded-xl border backdrop-blur-md shadow-lg ${getStatusColor(record.status)}`}>
-                                                <span className="text-[9px] font-black uppercase tracking-widest">{record.status}</span>
+                                                <span className="text-[9px] font-black uppercase tracking-widest">{getStatusText(record.status)}</span>
                                             </div>
                                         </div>
 
                                         <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 mb-8 flex flex-col items-center justify-center gap-1 group-hover:bg-white/[0.05] transition-all duration-500">
-                                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Transaction Value</p>
+                                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t.dashboard.transactionValue}</p>
                                             <div className="flex items-baseline gap-2">
                                                 <span className="text-4xl font-black text-white tracking-tighter drop-shadow-lg">{Number(record.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                                                <span className="text-sm font-black text-blue-500">ETB</span>
+                                                <span className="text-sm font-black text-blue-500">{t.dashboard.currencyEtb}</span>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-2">
                                             <div className="space-y-1.5">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Payment Method</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.paymentMethodLabel}</p>
                                                 <p className="text-sm font-black text-white/90 truncate pr-2 tracking-tight">{record.methodName || "Bank Transfer"}</p>
                                             </div>
                                             <div className="space-y-1.5 text-right">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Ref Number</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.refNumberLabel}</p>
                                                 <p className="text-sm font-black text-white/90 font-mono tracking-[0.1em]">{record.id.slice(-8).toUpperCase()}</p>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Currency</p>
-                                                <p className="text-sm font-black text-white/90">Ethiopian Birr (ETB)</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.currencyLabel}</p>
+                                                <p className="text-sm font-black text-white/90">Ethiopian Birr ({t.dashboard.currencyEtb})</p>
                                             </div>
                                             <div className="space-y-1.5 text-right">
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">Network</p>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest opacity-60">{t.dashboard.networkLabel}</p>
                                                 <p className="text-sm font-black text-emerald-400/90 tracking-widest">DGS-SECURE</p>
                                             </div>
                                         </div>
@@ -172,7 +185,7 @@ export default function RechargeRecordPage() {
                                                 <span className="text-[8px] font-bold text-gray-500 tracking-[0.2em] uppercase">TXN: {record.id.toUpperCase()}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[8px] font-black text-blue-400 tracking-widest uppercase italic">Safe Deposit</span>
+                                                <span className="text-[8px] font-black text-blue-400 tracking-widest uppercase italic">{t.dashboard.safeDepositTag}</span>
                                             </div>
                                         </div>
                                     </div>

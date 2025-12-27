@@ -29,6 +29,7 @@ export default function AddProductPage() {
         totalProfit: "",
         principalIncome: "",
         purchaseLimit: "",
+        category: "DGS",
         description: ""
     });
 
@@ -159,6 +160,7 @@ export default function AddProductPage() {
                 totalProfit: parseFloat(formData.totalProfit) || 0,
                 principalIncome: parseFloat(formData.principalIncome) || 0,
                 purchaseLimit: parseInt(formData.purchaseLimit) || 0,
+                category: formData.category || "DGS",
                 description: formData.description,
                 createdAt: new Date().toISOString()
             };
@@ -256,6 +258,33 @@ export default function AddProductPage() {
                                     <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                 </label>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Category Selection */}
+                    <div className="md:col-span-2">
+                        <div className="bg-[#141414] rounded-[2.5rem] p-8 border border-white/5 shadow-2xl">
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Product Category</label>
+                            <div className="flex gap-4">
+                                {["DGS", "VIP", "Limited"].map((cat) => (
+                                    <label key={cat} className={`flex-1 cursor-pointer`}>
+                                        <input
+                                            type="radio"
+                                            name="category"
+                                            value={cat}
+                                            checked={formData.category === cat}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                            className="hidden"
+                                        />
+                                        <div className={`text-center py-4 rounded-xl border transition-all font-bold ${formData.category === cat
+                                                ? "bg-blue-600 border-blue-500 text-white shadow-lg"
+                                                : "bg-black/40 border-white/10 text-gray-400 hover:bg-white/5"
+                                            }`}>
+                                            {cat}
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     </div>
 

@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function SubsidyPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -49,7 +51,7 @@ export default function SubsidyPage() {
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="text-xl font-black text-white tracking-wide uppercase">My Jewelry Portfolio</h2>
+                <h2 className="text-xl font-black text-white tracking-wide uppercase">{t.dashboard.jewelryPortfolio}</h2>
             </div>
 
             <div className="p-6 pb-32 max-w-2xl mx-auto space-y-8 pt-8">
@@ -59,7 +61,7 @@ export default function SubsidyPage() {
                     <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 rounded-[3rem] p-8 shadow-2xl overflow-hidden">
                         <div className="flex items-center justify-between mb-8">
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Holdings Value</p>
+                                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">{t.dashboard.holdingsValue}</p>
                                 <h1 className="text-4xl font-black text-white tracking-tighter">
                                     {totalInvestment.toLocaleString()}
                                     <span className="text-sm ml-2 text-amber-500/80 font-black">ETB</span>
@@ -72,11 +74,11 @@ export default function SubsidyPage() {
 
                         <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/5">
                             <div className="space-y-1">
-                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Daily Yield</p>
+                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{t.dashboard.dailyYield}</p>
                                 <p className="text-xl font-black text-emerald-400 tracking-tight">+{totalDailyIncome.toLocaleString()} Br</p>
                             </div>
                             <div className="space-y-1 text-right">
-                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Total Earnings</p>
+                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{t.dashboard.totalEarnings}</p>
                                 <p className="text-xl font-black text-blue-400 tracking-tight">{totalProfitEarned.toLocaleString()} Br</p>
                             </div>
                         </div>
@@ -85,12 +87,12 @@ export default function SubsidyPage() {
 
                 {/* Section Title */}
                 <div className="flex items-center justify-between px-2">
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Jewelry items ({orders.length})</span>
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">{t.dashboard.jewelryItemsLabel} ({orders.length})</span>
                     <button
                         onClick={() => router.push('/')}
                         className="text-[10px] font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors"
                     >
-                        Browse Shop →
+                        {t.dashboard.browseShop}
                     </button>
                 </div>
 
@@ -99,7 +101,7 @@ export default function SubsidyPage() {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 space-y-4">
                             <div className="animate-spin h-10 w-10 border-4 border-amber-500 border-t-transparent rounded-full"></div>
-                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Syncing Assets...</p>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">{t.dashboard.syncingAssets}</p>
                         </div>
                     ) : orders.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10">
@@ -107,8 +109,8 @@ export default function SubsidyPage() {
                                 <Image src="/jewelry_icon.png" alt="Icon" width={40} height={40} className="grayscale" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-gray-400">No Jewelry Items</h3>
-                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest px-10 mt-1">Start your luxury collection to see your items here</p>
+                                <h3 className="text-lg font-black text-gray-400">{t.dashboard.noJewelryItems}</h3>
+                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest px-10 mt-1">{t.dashboard.startCollectionDesc}</p>
                             </div>
                         </div>
                     ) : (
@@ -122,22 +124,22 @@ export default function SubsidyPage() {
                                                 <Image src="/jewelry_icon.png" alt="Icon" width={32} height={32} className="opacity-80" />
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-black text-white leading-tight">{order.productName || "Investment Plan"}</h3>
-                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-1">Term: {order.contractPeriod || 60} Days</p>
+                                                <h3 className="text-lg font-black text-white leading-tight">{order.productName || t.dashboard.investmentPlanLabel}</h3>
+                                                <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-1">{t.dashboard.termLabel}: {order.contractPeriod || 60} {t.dashboard.daysLabel}</p>
                                             </div>
                                         </div>
                                         <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{t.dashboard.activeStatus}</span>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-3xl mb-4 group-hover:bg-white/[0.04] transition-colors">
                                         <div className="space-y-1">
-                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Price Paid</p>
+                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{t.dashboard.pricePaidLabel}</p>
                                             <p className="text-lg font-black text-white tracking-tight">{order.price?.toLocaleString()} Br</p>
                                         </div>
                                         <div className="space-y-1 text-right">
-                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Daily Income</p>
+                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{t.dashboard.dailyIncome}</p>
                                             <p className="text-lg font-black text-amber-500 tracking-tight">{order.dailyIncome?.toLocaleString()} Br</p>
                                         </div>
                                     </div>
@@ -145,9 +147,9 @@ export default function SubsidyPage() {
                                     <div className="flex items-center justify-between px-2 pt-2 text-[10px] font-bold">
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                                            <span className="text-gray-500 uppercase tracking-widest">Cycle Progress</span>
+                                            <span className="text-gray-500 uppercase tracking-widest">{t.dashboard.cycleProgress}</span>
                                         </div>
-                                        <span className="text-blue-400 tracking-[0.2em] uppercase">Secured by DGS</span>
+                                        <span className="text-blue-400 tracking-[0.2em] uppercase">{t.dashboard.securedByDgs}</span>
                                     </div>
                                 </div>
                             </div>

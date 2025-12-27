@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
 import Image from "next/image";
 import BottomNav from "@/components/BottomNav";
 import { countries } from "@/lib/countries";
@@ -15,6 +15,8 @@ export default function ProfilePage() {
     const { t } = useLanguage();
     const [userData, setUserData] = useState<any | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [stats, setStats] = useState({ recharge: 0, withdraw: 0, activeDailyIncome: 0, totalGeneratedIncome: 0 });
+    const [teamCounts, setTeamCounts] = useState({ B: 0, C: 0, D: 0, E: 0 });
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user: any) => {
@@ -33,6 +35,65 @@ export default function ProfilePage() {
 
         return () => unsubscribe();
     }, [router]);
+
+    useEffect(() => {
+        if (!userData?.uid) return;
+
+        // 1. Recharge & Withdraw
+        const qRecharge = query(collection(db, "RechargeReview"), where("userId", "==", userData.uid), where("status", "==", "approved"));
+        const unsubRecharge = onSnapshot(qRecharge, snap => {
+            const total = snap.docs.reduce((acc, d) => acc + (Number(d.data().amount) || 0), 0);
+            setStats(prev => ({ ...prev, recharge: total }));
+        });
+
+        const qWithdraw = query(collection(db, "withdraw"), where("userId", "==", userData.uid), where("status", "==", "approved"));
+        const unsubWithdraw = onSnapshot(qWithdraw, snap => {
+            const total = snap.docs.reduce((acc, d) => acc + (Number(d.data().amount) || 0), 0);
+            setStats(prev => ({ ...prev, withdraw: total }));
+        });
+
+        // 3. Active Daily Income & Total Income from UserOrders
+        const qOrders = query(collection(db, "UserOrders"), where("userId", "==", userData.uid));
+        const unsubOrders = onSnapshot(qOrders, snap => {
+            let todayInc = 0;
+            let totalInc = 0;
+
+            snap.docs.forEach(doc => {
+                const data = doc.data();
+                const daily = Number(data.dailyIncome) || 0;
+
+                // Today Income (Active orders only)
+                if (data.status === 'active') {
+                    todayInc += daily;
+                }
+
+                // Total Income (Accumulated from all orders)
+                const period = Number(data.contractPeriod) || 0;
+                const remaining = Number(data.remainingDays); // can be 0
+                const daysPaid = Math.max(0, period - (isNaN(remaining) ? period : remaining));
+                totalInc += daysPaid * daily;
+            });
+
+            setStats(prev => ({ ...prev, activeDailyIncome: todayInc, totalGeneratedIncome: totalInc }));
+        });
+
+        // 2. Team Size
+        const levels = ["inviterA", "inviterB", "inviterC", "inviterD"];
+        const teamUnsubs = levels.map((field, idx) => {
+            const key = ["B", "C", "D", "E"][idx];
+            return onSnapshot(query(collection(db, "Customers"), where(field, "==", userData.uid)), snap => {
+                const validCount = snap.docs.filter(d => d.data().isValidMember).length;
+                setTeamCounts(prev => ({ ...prev, [key]: validCount }));
+            });
+        });
+
+        return () => {
+            unsubRecharge();
+            unsubWithdraw();
+            unsubOrders();
+            teamUnsubs.forEach(u => u());
+        };
+    }, [userData?.uid]);
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -75,7 +136,7 @@ export default function ProfilePage() {
                                     <div className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-lg"></div>
                                 </div>
                                 <div className="space-y-0.5 min-w-0">
-                                    <h3 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate">Name</h3>
+                                    <h3 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate">{t.dashboard.memberLabel}</h3>
                                     <div className="flex flex-col gap-0.5 mt-1.5 font-bold">
                                         <p className="text-[11px] text-gray-400 uppercase tracking-widest leading-none">
                                             UID: <span className="text-gray-500 font-black">{userData?.uid?.slice(0, 6) || "000000"}</span>
@@ -122,6 +183,30 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
+                    {/* Statistics Grid */}
+                    <div className="grid grid-cols-3 gap-y-6 gap-x-2 p-6 pb-2">
+                        {[
+                            { label: t.dashboard.totalRecharge, value: stats.recharge, color: "bg-purple-500" },
+                            { label: t.dashboard.totalIncome, value: stats.totalGeneratedIncome, color: "bg-blue-500" },
+                            { label: t.dashboard.totalWithdraw, value: stats.withdraw, color: "bg-orange-500" },
+                            { label: t.dashboard.teamIncome, value: userData?.inviteWallet || 0, color: "bg-purple-500" },
+                            { label: t.dashboard.teamSize, value: Object.values(teamCounts).reduce((a: number, b: number) => a + b, 0), color: "bg-blue-500", isCount: true },
+                            { label: t.dashboard.todayIncome, value: stats.activeDailyIncome, color: "bg-orange-500" }
+                        ].map((stat, idx) => (
+                            <div key={idx} className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1.5">
+                                    <div className={`w-1 h-3 rounded-full ${stat.color}`}></div>
+                                    <span className="text-[10px] text-gray-400 font-bold whitespace-nowrap">{stat.label}</span>
+                                </div>
+                                <span className="text-lg font-black text-gray-900 leading-none">
+                                    {stat.isCount
+                                        ? stat.value
+                                        : (typeof stat.value === 'number' ? stat.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00")}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
                     {/* Divider */}
                     <div className="mx-6 border-b border-gray-50/80"></div>
 
@@ -164,7 +249,7 @@ export default function ProfilePage() {
                                         <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
                                         {item.iconUrl ? (
                                             <div className="relative w-full h-full p-2.5">
-                                                <Image src={item.iconUrl} alt={item.label} fill className="object-contain" />
+                                                <Image src={item.iconUrl} alt={item.label || "Menu icon"} fill className="object-contain" />
                                             </div>
                                         ) : (
                                             <svg className="w-6.5 h-6.5 text-gray-800 relative z-10 transition-all duration-300 group-hover:text-indigo-600 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -5,9 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, runTransaction, collection, serverTimestamp, setDoc, query, where, getDocs } from "firebase/firestore";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ProductDetailPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const { id } = useParams();
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function ProductDetailPage() {
 
     const handleConfirmPurchase = async () => {
         if (!userId || !product) {
-            showNotification("Please login to purchase", "error");
+            showNotification(t.dashboard.loginToPurchase, "error");
             return;
         }
 
@@ -86,7 +88,8 @@ export default function ProductDetailPage() {
 
                 // --- 3. Deduct balance ONLY (Income starts after 24h) ---
                 transaction.update(userRef, {
-                    balanceWallet: currentBalance - product.price
+                    balanceWallet: currentBalance - product.price,
+                    isValidMember: true
                 });
 
                 // --- 4. Create Active Investment Order ---
@@ -107,25 +110,26 @@ export default function ProductDetailPage() {
                 });
 
                 // --- 5. Distribute Commissions (Write Phase) ---
-                const rates = [0.10, 0.05, 0.03, 0.02]; // Levels A, B, C, D
+                const rates = [0.10, 0.05, 0.03, 0.02]; // Levels A, B, C, D (corresponding to inviterA, B, C, D)
 
                 inviterSnaps.forEach((invSnap, index) => {
                     if (invSnap && invSnap.exists()) {
                         const inviterData = invSnap.data() as any;
-                        const reward = product.price * rates[index];
+                        const reward = Number(product.price) * rates[index];
+                        const inviterRef = inviterRefs[index];
 
-                        // Update Inviter Wallet
-                        transaction.update(inviterRefs[index]!, {
-                            inviteWallet: (inviterData.inviteWallet || 0) + reward
-                        });
-
-                        // Optional: Record the commission transaction record if you have a 'Transactions' collection
-                        // We skip this for now as per instructions, but wallets are updated.
+                        if (inviterRef) {
+                            // Update Inviter Wallet
+                            transaction.update(inviterRef, {
+                                inviteWallet: (Number(inviterData.inviteWallet) || 0) + reward
+                            });
+                            console.log(`commission distributed to level ${index} (uid: ${inviterData.uid}): ${reward}`);
+                        }
                     }
                 });
             });
 
-            showNotification("Investment Successful! ✅", "success");
+            showNotification(t.dashboard.investmentSuccessful, "success");
             setTimeout(() => {
                 setShowConfirm(false);
                 router.push('/welcome');
@@ -138,12 +142,12 @@ export default function ProductDetailPage() {
             }
 
             if (error.message === "INSUFFICIENT_FUNDS") {
-                showNotification("Insufficient balance! Please recharge. 💳", "error");
+                showNotification(t.dashboard.insufficientBalanceRecharge, "error");
                 setTimeout(() => router.push('/recharge'), 2000);
             } else if (error.message === "LIMIT_REACHED") {
-                showNotification(`Limit reached! You can only buy this ${product.purchaseLimit} times.`, "error");
+                showNotification(`${t.dashboard.limitReached} ${product.purchaseLimit}`, "error");
             } else {
-                showNotification("Failed to process order. Try again.", "error");
+                showNotification(t.dashboard.transactionFailed, "error");
             }
         } finally {
             setIsBuying(false);
