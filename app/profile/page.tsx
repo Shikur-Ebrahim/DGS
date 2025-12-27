@@ -139,10 +139,10 @@ export default function ProfilePage() {
                                     <h3 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate">{t.dashboard.memberLabel}</h3>
                                     <div className="flex flex-col gap-0.5 mt-1.5 font-bold">
                                         <p className="text-[11px] text-gray-400 uppercase tracking-widest leading-none">
-                                            UID: <span className="text-gray-500 font-black">{userData?.uid?.slice(0, 6) || "000000"}</span>
+                                            UID: <span className="text-gray-500 font-black">{userData?.uid ? userData.uid.slice(0, 6) : "..."}</span>
                                         </p>
                                         <p className="text-[15px] text-gray-500 tracking-wider">
-                                            {userData?.phoneNumber ? `251***${userData.phoneNumber.slice(-5)}` : "251***77777"}
+                                            {userData?.phoneNumber ? `251***${userData.phoneNumber.slice(-5)}` : "..."}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2.5 mt-3 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-blue-50/90 border border-indigo-100/40 w-fit shadow-inner">
