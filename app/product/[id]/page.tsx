@@ -315,16 +315,6 @@ export default function ProductDetailPage() {
                                     Total Withdrawal: Buy Principal {product.price.toLocaleString()} + Product Income {product.totalProfit.toLocaleString()} = <span className="text-[#5822b3] font-black text-base">{product.principalIncome.toLocaleString()} Br</span>.
                                 </p>
                             </div>
-                            <div className="flex flex-col gap-3">
-                                <p className="flex items-center gap-2 text-gray-500">
-                                    <svg className="w-4 h-4 text-[#4491f6]" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
-                                    Invite friends to buy <span className="text-gray-900 px-1.5 py-0.5 bg-gray-100 rounded-md">【{product.name}】</span> and receive a 400 Br referral reward.
-                                </p>
-                                <p className="flex items-center gap-2 text-gray-500">
-                                    <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                                    Buy <span className="text-gray-900 px-1.5 py-0.5 bg-gray-100 rounded-md">【{product.name}】</span> yourself and receive a 400 Br buy bonus.
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>
