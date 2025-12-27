@@ -12,11 +12,13 @@ const RECHARGE_AMOUNTS = [
 export default function RechargePage() {
     const router = useRouter();
     const { t } = useLanguage();
-    const [amount, setAmount] = useState(7500); // Default requirement
+    const [amount, setAmount] = useState<number | "">(7500);
 
     const handleAmountSelect = (val: number) => {
         setAmount(val);
     };
+
+    const isInvalid = !amount || Number(amount) < 1000;
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden flex flex-col">
@@ -45,8 +47,10 @@ export default function RechargePage() {
                 <div className="bg-[#4a00b3] rounded-2xl p-6 shadow-xl shadow-purple-900/20">
                     <p className="text-purple-200 text-sm font-medium mb-2">{t.dashboard.rechargeAmountLabel}:</p>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-white">{t.currencyBr}</span>
-                        <span className="text-5xl font-black text-white tracking-tight">{amount.toLocaleString()}</span>
+                        <span className="text-3xl font-bold text-purple-200">{t.currencyBr}</span>
+                        <span className="text-5xl font-black text-white tracking-tight">
+                            {amount ? Number(amount).toLocaleString() : "0"}
+                        </span>
                     </div>
                     <div className="h-0.5 w-full bg-white/20 mt-4"></div>
                 </div>
@@ -59,7 +63,7 @@ export default function RechargePage() {
                             onClick={() => handleAmountSelect(val)}
                             className={`
                                 py-4 rounded-xl font-bold text-sm transition-all
-                                ${amount === val
+                                ${Number(amount) === val
                                     ? 'bg-white text-[#4a00b3] shadow-lg scale-[1.02]'
                                     : 'bg-[#1a1a1a] text-gray-300 border border-white/5 hover:bg-[#252525]'
                                 }
@@ -68,6 +72,31 @@ export default function RechargePage() {
                             {val} {t.currencyBr}
                         </button>
                     ))}
+                </div>
+
+                {/* Custom Amount Input */}
+                <div className="bg-[#1a1a1a] p-5 rounded-2xl border border-white/5 mt-4">
+                    <label className="block text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3 pl-1">
+                        {t.dashboard.otherAmountLabel || "OR ENTER CUSTOM AMOUNT (MIN. 1000)"}
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
+                            placeholder="Enter amount"
+                            className={`w-full bg-black/40 border rounded-2xl py-5 px-6 text-white font-black text-xl focus:outline-none transition-all ${isInvalid && amount !== "" ? 'border-red-500/50' : 'border-white/10 focus:border-purple-500'}`}
+                        />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-purple-500 font-black text-sm tracking-widest">
+                            {t.currencyBr}
+                        </div>
+                    </div>
+                    {isInvalid && amount !== "" && (
+                        <p className="text-red-500 text-[10px] mt-3 font-bold px-1 flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                            {t.dashboard.minRechargeWarning || "Minimum recharge is 1,000 ETB"}
+                        </p>
+                    )}
                 </div>
 
                 {/* Tips Section */}
@@ -93,8 +122,9 @@ export default function RechargePage() {
             {/* Bottom Action Button */}
             <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#0a0a0a] to-transparent z-20">
                 <button
-                    onClick={() => router.push(`/payment-method?amount=${amount}`)}
-                    className="w-full h-14 bg-[#4a00b3] hover:bg-[#3d0099] text-white font-bold rounded-xl shadow-lg shadow-purple-900/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={() => !isInvalid && router.push(`/payment-method?amount=${amount}`)}
+                    disabled={isInvalid}
+                    className="w-full h-14 bg-[#4a00b3] hover:bg-[#3d0099] text-white font-black uppercase tracking-[0.2em] text-sm rounded-xl shadow-lg shadow-purple-900/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
                 >
                     {t.dashboard.selectPaymentMethod}
                 </button>
