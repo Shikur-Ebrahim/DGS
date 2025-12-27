@@ -25,7 +25,7 @@ export default function ServicePage() {
                 const docRef = doc(db, "Settings", "telegram");
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setTelegramSettings(prev => ({ ...prev, ...docSnap.data() }));
+                    setTelegramSettings((prev: any) => ({ ...prev, ...docSnap.data() }));
                 }
             } catch (error) {
                 console.error("Error fetching telegram settings:", error);
