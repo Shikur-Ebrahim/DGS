@@ -139,7 +139,6 @@ export default function ProductManagementPage() {
                 dailyRate: parseFloat(((parseFloat(editingProduct.dailyIncome) / parseFloat(editingProduct.price)) * 100).toFixed(2)) || 0,
                 totalProfit: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod)).toFixed(2)) || 0,
                 principalIncome: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod) + parseFloat(editingProduct.price)).toFixed(2)) || 0,
-                principalIncome: parseFloat((parseFloat(editingProduct.dailyIncome) * parseInt(editingProduct.contractPeriod) + parseFloat(editingProduct.price)).toFixed(2)) || 0,
                 category: editingProduct.category || "DGS",
                 updatedAt: new Date().toISOString()
             };
