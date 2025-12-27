@@ -14,6 +14,7 @@ export interface CustomerData {
     balanceWallet: number;
     taskWallet: number;
     inviteWallet: number;
+    totalTeamIncome: number;
     // Income Tracking
     totalIncome: number;
     dailyIncome: number;
@@ -53,7 +54,7 @@ export async function checkPhoneExists(phoneNumber: string): Promise<boolean> {
  * Register a new customer in Firebase Auth and Customers collection
  */
 export async function registerCustomer(
-    data: Omit<CustomerData, "createdAt" | "uid" | "referralCode" | "balanceWallet" | "taskWallet" | "inviteWallet" | "totalIncome" | "dailyIncome" | "productName" | "productPrice" | "inviterA" | "inviterB" | "inviterC" | "inviterD" | "VIP">,
+    data: Omit<CustomerData, "createdAt" | "uid" | "referralCode" | "balanceWallet" | "taskWallet" | "inviteWallet" | "totalTeamIncome" | "totalIncome" | "dailyIncome" | "productName" | "productPrice" | "inviterA" | "inviterB" | "inviterC" | "inviterD" | "VIP">,
     invitationCode?: string
 ): Promise<string> {
     // Check if phone already exists
@@ -100,6 +101,7 @@ export async function registerCustomer(
         balanceWallet: 0,
         taskWallet: 0,
         inviteWallet: 0,
+        totalTeamIncome: 0,
         totalIncome: 0,
         dailyIncome: 0,
         productName: null,

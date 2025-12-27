@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ExchangePage() {
@@ -12,6 +12,7 @@ export default function ExchangePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [userData, setUserData] = useState<any | null>(null);
     const [exchangeAmount, setExchangeAmount] = useState<number | "">("");
+    const [transferRate, setTransferRate] = useState(95); // Default 95% (5% fee)
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error'; show: boolean }>({ message: '', type: 'success', show: false });
 
@@ -33,6 +34,21 @@ export default function ExchangePage() {
         return () => unsubscribe();
     }, [router]);
 
+    // Fetch dynamic exchange rate
+    useEffect(() => {
+        const fetchRate = async () => {
+            try {
+                const rateDoc = await getDoc(doc(db, "Settings", "exchangeRate"));
+                if (rateDoc.exists()) {
+                    setTransferRate(rateDoc.data().rate || 95);
+                }
+            } catch (error) {
+                console.error("Error fetching exchange rate:", error);
+            }
+        };
+        fetchRate();
+    }, []);
+
     const showToast = (message: string, type: 'success' | 'error') => {
         setNotification({ message, type, show: true });
         setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
@@ -49,8 +65,9 @@ export default function ExchangePage() {
 
         setIsLoading(true);
         try {
-            // Calculate 95% of the exchange amount
-            const transferAmount = amount * 0.95;
+            // Calculate dynamic transfer amount based on admin settings
+            const rateFactor = transferRate / 100;
+            const transferAmount = amount * rateFactor;
 
             const newInviteBalance = (userData.inviteWallet || 0) - amount;
             const newMainBalance = (userData.balanceWallet || 0) + transferAmount;
@@ -150,8 +167,8 @@ export default function ExchangePage() {
                     {exchangeAmount && Number(exchangeAmount) > 0 && (
                         <div className="mt-3 pl-2 flex items-center gap-2 text-sm text-gray-400">
                             <span>{t.dashboard.youGetLabel}</span>
-                            <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.95).toFixed(2)} ETB</span>
-                            <span className="text-xs text-gray-600">{t.dashboard.rateLabel}</span>
+                            <span className="text-green-400 font-bold">{(Number(exchangeAmount) * (transferRate / 100)).toFixed(2)} ETB</span>
+                            <span className="text-xs text-gray-600">{t.dashboard.rateLabel} ({transferRate}%)</span>
                         </div>
                     )}
                 </div>
@@ -200,7 +217,7 @@ export default function ExchangePage() {
                             </div>
                             <div className="flex justify-between items-center p-4 rounded-xl bg-white/5">
                                 <span className="text-gray-400 text-sm">{t.dashboard.youReceiveLabel}</span>
-                                <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.95).toFixed(2)} ETB</span>
+                                <span className="text-green-400 font-bold">{(Number(exchangeAmount) * (transferRate / 100)).toFixed(2)} ETB</span>
                             </div>
                         </div>
 

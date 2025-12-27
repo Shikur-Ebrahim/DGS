@@ -84,6 +84,7 @@ export async function checkAndPaySalary(userId: string) {
 
                 transaction.update(userRef, {
                     inviteWallet: newInviteWallet,
+                    totalTeamIncome: (userData.totalTeamIncome || 0) + rule.salary,
                     lastSalaryDate: Timestamp.now()
                 });
 

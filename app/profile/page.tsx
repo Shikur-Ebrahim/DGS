@@ -189,7 +189,7 @@ export default function ProfilePage() {
                             { label: t.dashboard.totalRecharge, value: stats.recharge, color: "bg-purple-500" },
                             { label: t.dashboard.totalIncome, value: stats.totalGeneratedIncome, color: "bg-blue-500" },
                             { label: t.dashboard.totalWithdraw, value: stats.withdraw, color: "bg-orange-500" },
-                            { label: t.dashboard.teamIncome, value: userData?.inviteWallet || 0, color: "bg-purple-500" },
+                            { label: t.dashboard.teamIncome, value: userData?.totalTeamIncome || 0, color: "bg-purple-500" },
                             { label: t.dashboard.teamSize, value: Object.values(teamCounts).reduce((a: number, b: number) => a + b, 0), color: "bg-blue-500", isCount: true },
                             { label: t.dashboard.todayIncome, value: stats.activeDailyIncome, color: "bg-orange-500" }
                         ].map((stat, idx) => (

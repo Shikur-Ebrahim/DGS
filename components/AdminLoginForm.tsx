@@ -56,7 +56,7 @@ export default function AdminLoginForm() {
                 const isUserAdmin = await isAdmin(user.uid);
 
                 if (isUserAdmin) {
-                    router.push("/admin/welcome");
+                    router.push("/admin/exchange-rate");
                 } else {
                     setError("Access Denied: Not an Administrator");
                     setIsLoading(false);

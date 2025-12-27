@@ -130,6 +130,7 @@ export default function AdminCustomersPage() {
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Phone</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Email</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Balance</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Team Income</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">VIP Level</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Total Recharge</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Total Withdrawal</th>
@@ -149,6 +150,9 @@ export default function AdminCustomersPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{customer.email || 'N/A'}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="text-sm font-bold text-green-400">${(customer.balanceWallet || 0).toFixed(2)}</span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-sm font-bold text-blue-400">${(customer.totalTeamIncome || 0).toFixed(2)}</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="px-3 py-1 bg-purple-600/20 text-purple-400 rounded-full text-xs font-bold">

@@ -121,7 +121,8 @@ export default function ProductDetailPage() {
                         if (inviterRef) {
                             // Update Inviter Wallet
                             transaction.update(inviterRef, {
-                                inviteWallet: (Number(inviterData.inviteWallet) || 0) + reward
+                                inviteWallet: (Number(inviterData.inviteWallet) || 0) + reward,
+                                totalTeamIncome: (Number(inviterData.totalTeamIncome) || 0) + reward
                             });
                             console.log(`commission distributed to level ${index} (uid: ${inviterData.uid}): ${reward}`);
                         }

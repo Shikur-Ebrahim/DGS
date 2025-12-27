@@ -130,7 +130,7 @@ export default function TeamPage() {
         });
     };
 
-    const teamIncome = userData?.inviteWallet || 0;
+    const teamIncome = userData?.totalTeamIncome || 0;
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white pb-32">
