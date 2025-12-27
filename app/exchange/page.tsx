@@ -49,8 +49,8 @@ export default function ExchangePage() {
 
         setIsLoading(true);
         try {
-            // Calculate 70% of the exchange amount
-            const transferAmount = amount * 0.70;
+            // Calculate 95% of the exchange amount
+            const transferAmount = amount * 0.95;
 
             const newInviteBalance = (userData.inviteWallet || 0) - amount;
             const newMainBalance = (userData.balanceWallet || 0) + transferAmount;
@@ -150,7 +150,7 @@ export default function ExchangePage() {
                     {exchangeAmount && Number(exchangeAmount) > 0 && (
                         <div className="mt-3 pl-2 flex items-center gap-2 text-sm text-gray-400">
                             <span>{t.dashboard.youGetLabel}</span>
-                            <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.70).toFixed(2)} ETB</span>
+                            <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.95).toFixed(2)} ETB</span>
                             <span className="text-xs text-gray-600">{t.dashboard.rateLabel}</span>
                         </div>
                     )}
@@ -200,7 +200,7 @@ export default function ExchangePage() {
                             </div>
                             <div className="flex justify-between items-center p-4 rounded-xl bg-white/5">
                                 <span className="text-gray-400 text-sm">{t.dashboard.youReceiveLabel}</span>
-                                <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.70).toFixed(2)} ETB</span>
+                                <span className="text-green-400 font-bold">{(Number(exchangeAmount) * 0.95).toFixed(2)} ETB</span>
                             </div>
                         </div>
 
