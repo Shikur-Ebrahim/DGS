@@ -77,15 +77,16 @@ export async function checkAndPaySalary(userId: string) {
             // Use lastSalaryDate or fallback to vipEntryDate
             const lastPaymentTime = userData.lastSalaryDate?.toMillis() || userData.vipEntryDate?.toMillis() || 0;
             const now = Timestamp.now().toMillis();
+            const daysPassed = Math.floor(now / MS_PER_DAY) - Math.floor(lastPaymentTime / MS_PER_DAY);
 
-            if (now - lastPaymentTime >= SALARY_INTERVAL) {
+            if (daysPassed >= 30) {
                 // Pay Salary
                 const newInviteWallet = (userData.inviteWallet || 0) + rule.salary;
 
                 transaction.update(userRef, {
                     inviteWallet: newInviteWallet,
                     totalTeamIncome: (userData.totalTeamIncome || 0) + rule.salary,
-                    lastSalaryDate: Timestamp.now()
+                    lastSalaryDate: Timestamp.fromMillis(Math.floor(now / MS_PER_DAY) * MS_PER_DAY)
                 });
 
                 console.log(`Paid monthly salary of ${rule.salary} to ${userId} (VIP ${vipLevel})`);

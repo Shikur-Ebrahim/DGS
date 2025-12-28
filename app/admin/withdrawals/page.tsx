@@ -161,18 +161,26 @@ export default function WithdrawalWalletPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex gap-6 pt-2 border-t border-gray-100">
-                                                <div>
+                                            <div className="flex gap-6 pt-2 border-t border-gray-100 flex-wrap">
+                                                <div className="group/amount relative">
                                                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Amount</p>
-                                                    <p className="text-2xl font-black text-blue-600">{withdrawal.amount} ETB</p>
+                                                    <p className="text-2xl font-black text-blue-600 blur-[6px] group-hover/amount:blur-0 transition-all cursor-help duration-300">
+                                                        {withdrawal.amount.toLocaleString()} ETB
+                                                    </p>
+                                                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center opacity-40 group-hover/amount:opacity-0 transition-opacity pointer-events-none">
+                                                        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">PRIVATE</span>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Fee</p>
-                                                    <p className="text-lg font-bold text-red-600">-{withdrawal.fee} ETB</p>
+                                                    <p className="text-lg font-bold text-red-600">-{withdrawal.fee.toLocaleString()} ETB</p>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Actual Receipt</p>
-                                                    <p className="text-lg font-bold text-emerald-600">{withdrawal.actualReceipt} ETB</p>
+                                                <div className="relative overflow-hidden px-4 py-2 rounded-2xl bg-emerald-50 border border-emerald-100/50 shadow-inner">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite] pointer-events-none"></div>
+                                                    <p className="text-xs text-emerald-600/70 uppercase tracking-wide mb-0.5 font-black">Actual Receipt</p>
+                                                    <p className="text-2xl font-black text-emerald-600 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)] animate-pulse">
+                                                        {withdrawal.actualReceipt.toLocaleString()} ETB
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
