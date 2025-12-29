@@ -18,7 +18,7 @@ export default function AdminLoginForm() {
     // Admin Credentials provided by user
     const ADMIN_EMAIL = "lumio3828@gmail.com";
     const ADMIN_PHONE = "0938287788";
-    const ADMIN_PASSWORD = "LumioNewEra3828";
+    const ADMIN_PASSWORD = "DGSNewEra382835";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
