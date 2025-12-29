@@ -38,13 +38,47 @@ export default function AdminLoginForm() {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 user = userCredential.user;
             } catch (loginErr: any) {
-                // If user doesn't exist, try to create it (since credentials are verified against constants above)
-                if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential') {
-                    const { createUserWithEmailAndPassword } = await import("firebase/auth");
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    user = userCredential.user;
-                } else {
-                    throw loginErr;
+                console.log("Login failed, attempting recovery...", loginErr.code);
+
+                // 1. Try to recover: Check if the user exists with the OLD password
+                // This handles the transition from "LumioNewEra3828" to "DGSNewEra382835"
+                const OLD_PASSWORD = "LumioNewEra3828";
+                let recovered = false;
+
+                if (password !== OLD_PASSWORD) {
+                    try {
+                        const fallbackCredential = await signInWithEmailAndPassword(auth, email, OLD_PASSWORD);
+                        user = fallbackCredential.user;
+
+                        // If successful with old password, update to new password immediately
+                        const { updatePassword } = await import("firebase/auth");
+                        await updatePassword(user, password);
+                        console.log("Password automatically updated to new credential");
+                        recovered = true;
+                    } catch (fallbackErr) {
+                        // Old password failed too, so it's not a migration issue
+                        console.log("Fallback login failed");
+                    }
+                }
+
+                // 2. If recovery failed, try to create the user (if they truly don't exist)
+                if (!recovered) {
+                    if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential') {
+                        const { createUserWithEmailAndPassword } = await import("firebase/auth");
+                        try {
+                            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                            user = userCredential.user;
+                        } catch (createErr: any) {
+                            // If create fails because email exists, it means we have a zombie user 
+                            // (password is neither new nor old hardcoded one).
+                            if (createErr.code === 'auth/email-already-in-use') {
+                                throw new Error("Account exists but password invalid. Please contact support to reset.");
+                            }
+                            throw createErr;
+                        }
+                    } else {
+                        throw loginErr;
+                    }
                 }
             }
 
