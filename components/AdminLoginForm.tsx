@@ -45,20 +45,19 @@ export default function AdminLoginForm() {
                 const OLD_PASSWORD = "LumioNewEra3828";
                 let recovered = false;
 
-                if (password !== OLD_PASSWORD) {
-                    try {
-                        const fallbackCredential = await signInWithEmailAndPassword(auth, email, OLD_PASSWORD);
-                        user = fallbackCredential.user;
+                // Attempt to recover using old password
+                try {
+                    const fallbackCredential = await signInWithEmailAndPassword(auth, email, OLD_PASSWORD);
+                    user = fallbackCredential.user;
 
-                        // If successful with old password, update to new password immediately
-                        const { updatePassword } = await import("firebase/auth");
-                        await updatePassword(user, password);
-                        console.log("Password automatically updated to new credential");
-                        recovered = true;
-                    } catch (fallbackErr) {
-                        // Old password failed too, so it's not a migration issue
-                        console.log("Fallback login failed");
-                    }
+                    // If successful with old password, update to new password immediately
+                    const { updatePassword } = await import("firebase/auth");
+                    await updatePassword(user, password);
+                    console.log("Password automatically updated to new credential");
+                    recovered = true;
+                } catch (fallbackErr) {
+                    // Old password failed too, so it's not a migration issue
+                    console.log("Fallback login failed");
                 }
 
                 // 2. If recovery failed, try to create the user (if they truly don't exist)
@@ -71,7 +70,7 @@ export default function AdminLoginForm() {
                         } catch (createErr: any) {
                             // If create fails because email exists, it means we have a zombie user 
                             // (password is neither new nor old hardcoded one).
-                            if (createErr.code === 'auth/email-already-in-use') {
+                            if (createErr.code === 'auth/email-already-in-use' || createErr.message?.includes('email-already-in-use')) {
                                 throw new Error("Account exists but password invalid. Please contact support to reset.");
                             }
                             throw createErr;
