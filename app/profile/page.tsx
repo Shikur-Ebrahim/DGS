@@ -82,8 +82,8 @@ export default function ProfilePage() {
         const teamUnsubs = levels.map((field, idx) => {
             const key = ["B", "C", "D", "E"][idx];
             return onSnapshot(query(collection(db, "Customers"), where(field, "==", userData.uid)), snap => {
-                const validCount = snap.docs.filter(d => d.data().isValidMember).length;
-                setTeamCounts(prev => ({ ...prev, [key]: validCount }));
+                const totalCount = snap.docs.length;
+                setTeamCounts(prev => ({ ...prev, [key]: totalCount }));
             });
         });
 

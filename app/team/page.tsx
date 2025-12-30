@@ -53,9 +53,8 @@ export default function TeamPage() {
                     const q = query(customersRef, where(field, "==", user.uid));
 
                     return onSnapshot(q, (snapshot: any) => {
-                        const validDocs = snapshot.docs.filter((d: any) => d.data().isValidMember);
-                        const count = validDocs.length;
-                        const assets = validDocs.reduce((acc: any, d: any) => acc + (d.data().balanceWallet || 0), 0);
+                        const count = snapshot.docs.length;
+                        const assets = snapshot.docs.reduce((acc: any, d: any) => acc + (d.data().balanceWallet || 0), 0);
 
                         setTeamStats(prev => ({
                             ...prev,
@@ -68,7 +67,7 @@ export default function TeamPage() {
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
                             const todayTimestamp = Timestamp.fromDate(today);
-                            const increasedToday = validDocs.filter((d: any) => {
+                            const increasedToday = snapshot.docs.filter((d: any) => {
                                 const createdAt = d.data().createdAt;
                                 return createdAt && createdAt.toMillis() >= todayTimestamp.toMillis();
                             }).length;
