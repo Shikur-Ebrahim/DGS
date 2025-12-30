@@ -18,7 +18,16 @@ function HomeContent() {
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const referralId = searchParams.get("ref") || undefined;
+
+  // Persist referral ID in sessionStorage so it survives if the user clicks the root domain later
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      sessionStorage.setItem("dgs_referral_id", ref);
+    }
+  }, [searchParams]);
+
+  const referralId = searchParams.get("ref") || (typeof window !== "undefined" ? sessionStorage.getItem("dgs_referral_id") : undefined) || undefined;
 
   // Close dropdown when clicking outside
   useEffect(() => {
