@@ -309,7 +309,7 @@ export default function WelcomePage() {
                             <p className="text-[10px] text-blue-400/90 font-black tracking-widest uppercase drop-shadow-md">{t.dashboard.currentBalance}</p>
                             <div className="flex items-baseline gap-1">
                                 <h4 className="text-4xl font-black text-white leading-none tracking-tighter drop-shadow-[0_2px_12px_rgba(37,99,235,0.4)]">
-                                    {userData?.balanceWallet !== undefined ? userData.balanceWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                    {(userData?.balanceWallet !== undefined && !isNaN(Number(userData.balanceWallet))) ? userData.balanceWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
                                 </h4>
                                 <span className="text-4xl font-bold text-blue-300 leading-none">ETB</span>
                             </div>

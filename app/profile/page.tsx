@@ -148,7 +148,7 @@ export default function ProfilePage() {
                                     <div className="flex items-center gap-2.5 mt-3 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-blue-50/90 border border-indigo-100/40 w-fit shadow-inner">
                                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] leading-none">{t.dashboard.balanceLabel}</span>
                                         <span className="text-[16px] font-black text-gray-900 tracking-tight flex items-baseline gap-0.5">
-                                            {userData?.balanceWallet?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}
+                                            {userData?.balanceWallet !== undefined && !isNaN(Number(userData.balanceWallet)) ? userData.balanceWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
                                             <span className="text-indigo-400 font-bold ml-1">ETB</span>
                                         </span>
                                     </div>
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                                 <span className="text-lg font-black text-gray-900 leading-none">
                                     {stat.isCount
                                         ? stat.value
-                                        : (typeof stat.value === 'number' ? stat.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00")}
+                                        : (typeof stat.value === 'number' && !isNaN(stat.value) ? stat.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00")}
                                 </span>
                             </div>
                         ))}
