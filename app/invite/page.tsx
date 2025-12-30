@@ -88,18 +88,41 @@ export default function InvitePage() {
                     </div>
                 </div>
 
-                {/* Invite Button Section */}
-                <div className="mt-auto space-y-4">
+                {/* Referral Link Section */}
+                <div className="mt-auto space-y-6">
+                    {/* Link Display Box */}
+                    <div className="relative group">
+                        <div className="w-full bg-gray-50 border-2 border-gray-100 rounded-[1.5rem] p-5 pr-16 text-left transition-all group-hover:bg-gray-100">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                                {t.dashboard.referralLinkLabel}
+                            </p>
+                            <p className="text-sm font-bold text-gray-700 truncate select-all">
+                                {referralLink}
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleCopy}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center hover:bg-white hover:shadow-md active:scale-90 transition-all"
+                        >
+                            {copySuccess ? (
+                                <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            ) : (
+                                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Primary Action Button */}
                     <button
                         onClick={handleCopy}
-                        className="w-full h-16 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] font-black text-xl shadow-2xl shadow-indigo-600/30 active:scale-[0.98] transition-all flex items-center justify-center"
+                        className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.5rem] font-black text-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center"
                     >
                         {copySuccess ? t.dashboard.linkCopied : t.dashboard.inviteBtn}
                     </button>
-                    {/* Tiny helpful text instead of the big box */}
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
-                        {t.dashboard.referralLinkLabel}
-                    </p>
                 </div>
             </div>
 
