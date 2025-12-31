@@ -14,7 +14,10 @@ import {
     serverTimestamp,
     setDoc,
     getDoc,
-    addDoc
+    addDoc,
+    orderBy,
+    limit,
+    Timestamp
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
@@ -54,6 +57,8 @@ export default function WithdrawalPage() {
     const [inviteRechargeTotal, setInviteRechargeTotal] = useState(0);
     const [userProductIds, setUserProductIds] = useState<string[]>([]);
     const [hasPurchasedProduct, setHasPurchasedProduct] = useState(false);
+    const [lastWithdrawalTime, setLastWithdrawalTime] = useState<number | null>(null);
+    const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
 
     const FEE_PERCENT = 0.06; // 6% fee
 
@@ -161,6 +166,62 @@ export default function WithdrawalPage() {
         };
     }, [user?.id]);
 
+    // Real-time listener for withdrawals to handle restriction
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const withdrawRef = collection(db, "withdraw");
+        const q = query(withdrawRef, where("userId", "==", user.id));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            if (!snapshot.empty) {
+                // Sort in memory to find the latest withdrawal WITHOUT requiring an index
+                const withdrawals = snapshot.docs.map(doc => doc.data());
+                const latestWithdrawal = withdrawals
+                    .filter(w => w.createdAt) // Ensure it has a timestamp
+                    .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())[0];
+
+                if (latestWithdrawal) {
+                    setLastWithdrawalTime(latestWithdrawal.createdAt.toMillis());
+                } else {
+                    setLastWithdrawalTime(null);
+                }
+            } else {
+                // If no withdrawals exist (or all were deleted), unlock immediately
+                setLastWithdrawalTime(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [user?.id]);
+
+    // Countdown Timer logic
+    useEffect(() => {
+        if (!lastWithdrawalTime) return;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const lockUntil = lastWithdrawalTime + (24 * 60 * 60 * 1000);
+            const remaining = lockUntil - now;
+
+            if (remaining > 0) {
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                setTimeRemaining(
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                );
+            } else {
+                setTimeRemaining(null);
+            }
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [lastWithdrawalTime]);
+
     // Fetch user's purchased products
     useEffect(() => {
         if (!user?.id) return;
@@ -207,6 +268,12 @@ export default function WithdrawalPage() {
     }, [selectedBank, user]);
 
     const handleWithdrawClick = () => {
+        // Check 24-hour restriction
+        if (timeRemaining) {
+            showNotification(`Next withdrawal available in ${timeRemaining}`, "error");
+            return;
+        }
+
         // Check if user has purchased a product
         if (!hasPurchasedProduct) {
             showNotification(t.dashboard.mustPurchaseProduct, "error");
@@ -526,12 +593,41 @@ export default function WithdrawalPage() {
                 </div>
 
                 {/* Withdraw Button */}
-                <button
-                    onClick={handleWithdrawClick}
-                    className="w-full h-16 bg-[#5D26C1] hover:bg-[#4a1fa1] text-white rounded-3xl font-black text-xl shadow-xl shadow-purple-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                >
-                    {t.dashboard.withdrawBtn}
-                </button>
+                <div className="relative group">
+                    {timeRemaining && (
+                        <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 rounded-[2rem] blur-xl opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                    )}
+                    <button
+                        onClick={handleWithdrawClick}
+                        disabled={!!timeRemaining}
+                        className={`relative w-full h-20 rounded-3xl font-black text-xl shadow-2xl transition-all duration-500 flex flex-col items-center justify-center gap-1 overflow-hidden group active:scale-[0.98] ${timeRemaining
+                            ? 'bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#1E293B] cursor-not-allowed border border-white/5'
+                            : 'bg-[#5D26C1] hover:bg-[#4a1fa1] text-white shadow-purple-500/30'
+                            }`}
+                    >
+                        {/* Shimmer Effect */}
+                        {timeRemaining && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer"></div>
+                        )}
+
+                        <span className={`tracking-tight ${timeRemaining ? 'text-gray-400 opacity-80' : 'text-white'}`}>
+                            {timeRemaining ? 'Withdrawal Restricted' : t.dashboard.withdrawBtn}
+                        </span>
+
+                        {timeRemaining && (
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mt-1 animate-float">
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
+                                <span className="text-[11px] font-black uppercase tracking-widest text-white drop-shadow-sm flex items-center gap-1">
+                                    Next attempt in <span className="text-red-400 ml-1 font-mono text-xs tracking-normal">{timeRemaining}</span>
+                                </span>
+                            </div>
+                        )}
+
+                        {!timeRemaining && (
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Bank List Modal */}
@@ -641,9 +737,29 @@ export default function WithdrawalPage() {
                 .animate-progress {
                     animation: progress 4s linear;
                 }
+                .animate-shimmer {
+                    animation: shimmer 2.5s infinite linear;
+                }
+                .animate-float {
+                    animation: float 3s ease-in-out infinite;
+                }
+                .animate-pulse-slow {
+                    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                }
                 @keyframes progress {
                     0% { width: 0%; }
                     100% { width: 100%; }
+                }
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
+                }
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-3px); }
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 0.5; }
+                    50% { opacity: 1; }
                 }
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 4px;
