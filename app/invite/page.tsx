@@ -34,12 +34,57 @@ export default function InvitePage() {
 
     const referralLink = `${baseUrl}/?ref=${userData?.referralCode || ""}`;
 
-    const handleCopy = () => {
+    const handleCopy = async () => {
         if (!userData?.uid) return;
-        navigator.clipboard.writeText(referralLink).then(() => {
+
+        let successful = false;
+
+        try {
+            // Try the modern Clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(referralLink);
+                successful = true;
+            } else {
+                // Fallback for non-secure contexts or older mobile browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = referralLink;
+
+                // Ensure the textarea is off-screen
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+
+                // For iOS compatibility
+                textArea.contentEditable = "true";
+                textArea.readOnly = false;
+
+                textArea.focus();
+                textArea.select();
+                textArea.setSelectionRange(0, 99999); // For mobile devices
+
+                successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+        } catch (err) {
+            console.error("Failed to copy link:", err);
+            // Even if it fails, try the fallback one last time if we didn't already
+            if (!successful) {
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = referralLink;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                } catch (e) { }
+            }
+        }
+
+        if (successful) {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
-        });
+        }
     };
 
     return (
