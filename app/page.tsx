@@ -43,15 +43,15 @@ function HomeContent() {
     return () => unsubscribe();
   }, [router]);
 
-  // Persist referral ID in sessionStorage so it survives if the user clicks the root domain later
+  // Persist referral ID in localStorage so it survives if the user installs the app or reopens the browser
   useEffect(() => {
     const ref = searchParams.get("ref");
     if (ref) {
-      sessionStorage.setItem("dgs_referral_id", ref);
+      localStorage.setItem("dgs_referral_id", ref);
     }
   }, [searchParams]);
 
-  const referralId = searchParams.get("ref") || (typeof window !== "undefined" ? sessionStorage.getItem("dgs_referral_id") : undefined) || undefined;
+  const referralId = searchParams.get("ref") || (typeof window !== "undefined" ? localStorage.getItem("dgs_referral_id") : undefined) || undefined;
 
   // Close dropdown when clicking outside
   useEffect(() => {

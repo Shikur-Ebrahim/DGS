@@ -105,6 +105,41 @@ export default function AdminRechargePage() {
                     approvedAt: new Date().toISOString()
                 });
 
+                // --- REWARD DISTRIBUTION LOGIC ---
+                // Distribute rewards to inviters (A: 10%, B: 5%, C: 3%, D: 2%)
+                const inviters = [
+                    { id: customerData.inviterA, rate: 0.10 },
+                    { id: customerData.inviterB, rate: 0.05 },
+                    { id: customerData.inviterC, rate: 0.03 },
+                    { id: customerData.inviterD, rate: 0.02 }
+                ];
+
+                for (const inviter of inviters) {
+                    if (inviter.id) {
+                        try {
+                            const inviterRef = doc(db, "Customers", inviter.id);
+                            const reward = rechargeAmount * inviter.rate;
+
+                            // Update inviter's team income and invite wallet
+                            // Use a simple update for now, but in high concurrency a transaction would be better
+                            const inviterSnap = await getDoc(inviterRef);
+                            if (inviterSnap.exists()) {
+                                const currentInviteWallet = inviterSnap.data().inviteWallet || 0;
+                                const currentTeamIncome = inviterSnap.data().totalTeamIncome || 0;
+
+                                await updateDoc(inviterRef, {
+                                    inviteWallet: currentInviteWallet + reward,
+                                    totalTeamIncome: currentTeamIncome + reward
+                                });
+                                console.log(`Distributed ${reward} reward to inviter ${inviter.id}`);
+                            }
+                        } catch (err) {
+                            console.error(`Failed to distribute reward to ${inviter.id}:`, err);
+                        }
+                    }
+                }
+                // --- END REWARD DISTRIBUTION ---
+
                 console.log(`Approved recharge for ${request.phoneNumber}: ${rechargeAmount} Br added to balance.`);
             } else {
                 alert("Customer not found!");
