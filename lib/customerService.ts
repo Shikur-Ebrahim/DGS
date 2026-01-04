@@ -74,10 +74,20 @@ export async function registerCustomer(
         const inviterSnap = await getDocs(query(collection(db, "Customers"), where("referralCode", "==", invitationCode)));
 
         if (!inviterSnap.empty) {
-            const inviterData = inviterSnap.docs[0].data() as CustomerData;
-            inviterA = inviterData.uid || null; // The inviter's UID is still used for the hierarchy links
+            const inviterDoc = inviterSnap.docs[0];
+            const inviterData = inviterDoc.data() as CustomerData;
+
+            // Use the document ID as the uid, which is safer/guaranteed
+            inviterA = inviterDoc.id;
+
+            // Shift the hierarchy for the new user:
+            // NewUser.inviterB = Inviter.inviterA (The inviter of the current inviter)
             inviterB = inviterData.inviterA || null;
+
+            // NewUser.inviterC = Inviter.inviterB (The grand-inviter)
             inviterC = inviterData.inviterB || null;
+
+            // NewUser.inviterD = Inviter.inviterC (The great-grand-inviter)
             inviterD = inviterData.inviterC || null;
         }
     }

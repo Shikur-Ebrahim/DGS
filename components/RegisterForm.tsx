@@ -456,35 +456,6 @@ export default function RegisterForm({ onSuccess, referralId }: RegisterFormProp
                     )}
                 </div>
 
-                {/* Invitation Code */}
-                <div className="space-y-2 animate-slide-up">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-yellow-500 ml-1">
-                        <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                        </svg>
-                        {t.dashboard.invitationCodeLabel || "Invitation Code"}
-                    </label>
-                    <div className="relative group">
-                        <input
-                            type="text"
-                            value={invitationCode}
-                            onChange={(e) => setInvitationCode(e.target.value)}
-                            onFocus={() => setFocusedField('invitationCode')}
-                            onBlur={() => setFocusedField(null)}
-                            placeholder={t.dashboard.enterInvitationCode || "Enter code (Optional)"}
-                            className={`
-                                ${inputClasses('invitationCode')}
-                                border-yellow-500/30 hover:border-yellow-500/50
-                                ${focusedField === 'invitationCode' ? 'border-yellow-500 shadow-yellow-500/50' : ''}
-                            `}
-                        />
-                        {referralId && (
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-yellow-500 uppercase tracking-widest animate-pulse">
-                                Auto-Applied
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 {/* Register Button and Msgs */}
                 <div className="space-y-4">
