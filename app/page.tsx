@@ -24,6 +24,12 @@ function HomeContent() {
 
   // Check if user is already logged in or has persistent session
   useEffect(() => {
+    // If there is a referral in the URL, we MUST stay on the landing page to register
+    if (searchParams.get("ref")) {
+      setIsCheckingAuth(false);
+      return;
+    }
+
     // 1. Instant check for persistent flag
     const isPersistent = localStorage.getItem('dgs_user_persistent') === 'true';
     if (isPersistent) {
@@ -41,7 +47,7 @@ function HomeContent() {
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, searchParams]);
 
   // Persist referral ID in localStorage so it survives if the user installs the app or reopens the browser
   useEffect(() => {
