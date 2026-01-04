@@ -30,7 +30,7 @@ export default function SubsidyPage() {
 
                 return () => unsubOrders();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

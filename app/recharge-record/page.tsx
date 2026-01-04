@@ -36,7 +36,7 @@ export default function RechargeRecordPage() {
 
                 return () => unsubRecords();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

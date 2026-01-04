@@ -51,7 +51,8 @@ export default function WithdrawalWalletPage() {
         setProcessingId(id);
         try {
             await updateDoc(doc(db, "withdraw", id), {
-                status: newStatus
+                status: newStatus,
+                approvedAt: new Date().toISOString()
             });
 
             // Update local state

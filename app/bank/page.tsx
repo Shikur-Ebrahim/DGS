@@ -34,7 +34,7 @@ export default function UserBankPage() {
 
                 return () => unsubBanks();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

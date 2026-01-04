@@ -46,7 +46,7 @@ export default function WalletPage() {
                     }
                 });
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

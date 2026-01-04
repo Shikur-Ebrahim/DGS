@@ -29,7 +29,7 @@ export default function ProfilePage() {
                 });
                 return () => unsubDoc();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 
@@ -99,7 +99,7 @@ export default function ProfilePage() {
         setIsLoggingOut(true);
         try {
             await signOut(auth);
-            router.push("/");
+            router.push("/welcome");
         } catch (error) {
             console.error("Logout failed:", error);
             setIsLoggingOut(false);

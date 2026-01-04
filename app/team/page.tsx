@@ -81,7 +81,7 @@ export default function TeamPage() {
                     unsubs.forEach(unsub => unsub());
                 };
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

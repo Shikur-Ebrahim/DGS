@@ -18,7 +18,7 @@ export default function AddBankPage() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user: any) => {
-            if (!user) router.push("/login");
+            if (!user) router.push("/welcome");
         });
 
         const banksRef = collection(db, "WithdrawalBanks");

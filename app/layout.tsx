@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   title: "DGS - Digital Gold System",
   description: "Join DGS Pro - The ultimate investment platform for digital gold. Start your journey today and earn rewards.",
   keywords: ["DGS", "Digital Gold", "Investment", "Rewards", "Invite"],
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "DGS Pro",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: "DGS - Digital Gold System",
     description: "Join me on DGS and let's earn together!",
@@ -40,7 +49,16 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 import { LanguageProvider } from "@/lib/LanguageContext";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 export default function RootLayout({
   children,
@@ -53,6 +71,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LanguageProvider>
+          <ServiceWorkerRegistration />
           {children}
         </LanguageProvider>
       </body>

@@ -21,7 +21,7 @@ export default function CurrencyPage() {
                 });
                 return () => unsubDoc();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

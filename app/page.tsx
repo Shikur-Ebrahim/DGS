@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import RegisterForm from "@/components/RegisterForm";
 import LoginForm from "@/components/LoginForm";
 import Image from "next/image";
@@ -18,6 +20,28 @@ function HomeContent() {
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already logged in or has persistent session
+  useEffect(() => {
+    // 1. Instant check for persistent flag
+    const isPersistent = localStorage.getItem('dgs_user_persistent') === 'true';
+    if (isPersistent) {
+      router.replace("/welcome");
+      return;
+    }
+
+    // 2. Secondary check via Firebase Auth
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        localStorage.setItem('dgs_user_persistent', 'true');
+        router.replace("/welcome");
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   // Persist referral ID in sessionStorage so it survives if the user clicks the root domain later
   useEffect(() => {
@@ -39,6 +63,22 @@ function HomeContent() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center">
+        <div className="relative w-32 h-32 mb-8 animate-pulse">
+          <Image src="/dgs_app_icon.png" alt="DGS" fill className="object-contain opacity-50 gray-scale" />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:-.3s]"></div>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-.5s]"></div>
+        </div>
+        <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-6 animate-pulse">Establishing Secure Session</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] p-6 md:p-8 overflow-x-hidden">

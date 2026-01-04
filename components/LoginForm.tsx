@@ -61,6 +61,9 @@ export default function LoginForm({ }: LoginFormProps) {
             // const fullPhoneNumber = `${selectedCountry.code} ${phoneNumber}`; // Removed prefix logic
             await loginWithPhone(rawPhoneNumber, password); // Pass raw number
 
+            // Set persistence flag for redirect logic
+            localStorage.setItem('dgs_user_persistent', 'true');
+
             setTimeout(() => {
                 // Force hard navigation to ensure page loads correctly
                 window.location.href = "/welcome";

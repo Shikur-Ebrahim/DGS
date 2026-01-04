@@ -50,7 +50,7 @@ export default function WithdrawalRecordPage() {
 
                 return () => unsubRecords();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

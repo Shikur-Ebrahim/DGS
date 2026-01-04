@@ -34,7 +34,7 @@ export default function WithdrawalPasswordPage() {
                 setHasSetPassword(pwdSnap.exists());
                 setLoading(false);
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
         return () => unsubscribe();

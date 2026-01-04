@@ -125,6 +125,9 @@ export default function RegisterForm({ onSuccess, referralId }: RegisterFormProp
                 setConfirmPassword("");
                 setPhoneNumber(""); // Reset to empty
 
+                // Set persistence flag for redirect logic
+                localStorage.setItem('dgs_user_persistent', 'true');
+
                 // Slightly delay redirect or callback so user sees the message
                 setTimeout(() => {
                     if (onSuccess) {

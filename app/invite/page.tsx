@@ -26,7 +26,7 @@ export default function InvitePage() {
                 });
                 return () => unsub();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
         return () => unsubscribeAuth();

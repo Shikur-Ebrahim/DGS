@@ -27,7 +27,7 @@ export default function ExchangePage() {
                 });
                 return () => unsubDoc();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import LoginForm from "@/components/LoginForm";
 import { doc, onSnapshot, updateDoc, collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { countries } from "@/lib/countries";
 import Image from "next/image";
@@ -20,6 +21,7 @@ export default function WelcomePage() {
 
     const { language, setLanguage, t } = useLanguage();
     const [isLoading, setIsLoading] = useState(false);
+    const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
     const [showLangDropdown, setShowLangDropdown] = useState(false);
     const langDropdownRef = useRef<HTMLDivElement>(null);
     const [currentSlide, setCurrentSlide] = useState(0); // Start with jolery 1 (index 0)
@@ -130,10 +132,12 @@ export default function WelcomePage() {
                         // Sync income on every data refresh/login
                         syncUserIncome(user.uid);
                     }
+                    setHasCheckedAuth(true);
                 });
             } else {
                 if (unsubscribeDoc) unsubscribeDoc();
                 setUserData(null);
+                setHasCheckedAuth(true);
             }
         });
 
@@ -460,6 +464,42 @@ export default function WelcomePage() {
 
 
 
+
+    if (hasCheckedAuth && !userData?.uid && !auth.currentUser) {
+        return (
+            <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 sm:p-8 overflow-x-hidden relative">
+                {/* Background Ambience */}
+                <div className="fixed top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+                </div>
+
+                <div className="relative z-10 w-full max-w-md animate-fade-in">
+                    <div className="mb-8 text-center">
+                        <div className="relative w-24 h-24 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20">
+                            <Image src="/dgs_app_icon.png" alt="DGS Logo" fill className="object-cover scale-110" />
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">DGS PRO</h1>
+                        <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-2">Authenticated Session Required</p>
+                    </div>
+
+                    <LoginForm />
+
+                    <div className="mt-8 text-center">
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('dgs_user_persistent');
+                                router.push("/");
+                            }}
+                            className="text-xs font-black text-gray-600 uppercase tracking-widest hover:text-white transition-colors"
+                        >
+                            Return to Selection Page
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`min-h-screen bg-[#0a0a0a] text-white pb-28`}>

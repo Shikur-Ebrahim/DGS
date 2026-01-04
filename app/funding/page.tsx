@@ -36,7 +36,7 @@ export default function FundingPage() {
 
                 return () => unsubOrders();
             } else {
-                router.push("/login");
+                router.push("/welcome");
             }
         });
 
