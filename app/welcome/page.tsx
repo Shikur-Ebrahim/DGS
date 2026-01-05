@@ -31,6 +31,30 @@ export default function WelcomePage() {
     const sliderRef = useRef<HTMLDivElement>(null);
     const feedRef = useRef<HTMLDivElement>(null);
 
+    // Secret Admin Redirect Logic
+    const [adminClickCount, setAdminClickCount] = useState(0);
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleLogoClick = () => {
+        if (clickTimeoutRef.current) {
+            clearTimeout(clickTimeoutRef.current);
+        }
+
+        const newCount = adminClickCount + 1;
+        setAdminClickCount(newCount);
+
+        if (newCount >= 5) {
+            router.push('/admin');
+            setAdminClickCount(0);
+            return;
+        }
+
+        // Reset count if no click within 2 seconds
+        clickTimeoutRef.current = setTimeout(() => {
+            setAdminClickCount(0);
+        }, 2000);
+    };
+
 
 
     const images = [
@@ -216,7 +240,10 @@ export default function WelcomePage() {
     const renderHeader = () => (
         <header className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-blue-500/10 ring-1 ring-white/10">
+                <div
+                    onClick={handleLogoClick}
+                    className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-blue-500/10 ring-1 ring-white/10 active:scale-95 transition-transform cursor-pointer"
+                >
                     <Image src="/dgs_app_icon.png" alt="Logo" fill className="object-cover scale-110" />
                 </div>
             </div>
@@ -476,7 +503,10 @@ export default function WelcomePage() {
 
                 <div className="relative z-10 w-full max-w-md animate-fade-in">
                     <div className="mb-8 text-center">
-                        <div className="relative w-24 h-24 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20">
+                        <div
+                            onClick={handleLogoClick}
+                            className="relative w-24 h-24 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20 active:scale-95 transition-transform cursor-pointer"
+                        >
                             <Image src="/dgs_app_icon.png" alt="DGS Logo" fill className="object-cover scale-110" />
                         </div>
                         <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">DGS PRO</h1>

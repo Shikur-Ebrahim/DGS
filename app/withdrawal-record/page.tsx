@@ -20,6 +20,8 @@ interface WithdrawalRecord {
     accountHolderName: string;
     status: string;
     createdAt: Timestamp;
+    editReason?: string;
+    editedAt?: string;
 }
 
 export default function WithdrawalRecordPage() {
@@ -203,6 +205,26 @@ export default function WithdrawalRecordPage() {
                                                 <p className="text-sm font-black text-blue-400/90 font-mono">+{record.phoneNumber}</p>
                                             </div>
                                         </div>
+
+                                        {/* Edit Reason Section (if exists) */}
+                                        {record.editReason && (
+                                            <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
+                                                <div className="flex items-start gap-3">
+                                                    <svg className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <div className="flex-1">
+                                                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">DGS System Check Tracking</p>
+                                                        <p className="text-sm text-amber-100/90 font-medium leading-relaxed">{record.editReason}</p>
+                                                        {record.editedAt && (
+                                                            <p className="text-[8px] text-amber-500/60 font-bold mt-2 uppercase tracking-wider">
+                                                                Modified: {new Date(record.editedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Security Footnote */}
                                         <div className="mt-8 pt-5 border-t border-white/5 flex items-center justify-between">

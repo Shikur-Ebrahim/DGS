@@ -21,6 +21,9 @@ export default function ProductPage() {
                 id: doc.id,
                 ...(doc.data() as any)
             }));
+            // Sort by price ascending (low to high)
+            productsData.sort((a: any, b: any) => Number(a.price) - Number(b.price));
+
             setProducts(productsData);
             setLoading(false);
         });
