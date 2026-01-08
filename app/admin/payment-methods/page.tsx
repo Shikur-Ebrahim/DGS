@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { isAdmin } from "@/lib/adminService";
 import Image from "next/image";
@@ -21,6 +21,12 @@ export default function AdminPaymentMethodsPage() {
     const [methodName, setMethodName] = useState("");
     const [accountNumbers, setAccountNumbers] = useState<string[]>([""]); // Array of account numbers
     const [logoFile, setLogoFile] = useState<File | null>(null);
+
+    // Edit State
+    const [editingMethod, setEditingMethod] = useState<any>(null);
+    const [editName, setEditName] = useState("");
+    const [editAccountNumbers, setEditAccountNumbers] = useState<string[]>([""]);
+    const [editLogoFile, setEditLogoFile] = useState<File | null>(null);
 
     // Data State
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -159,6 +165,63 @@ export default function AdminPaymentMethodsPage() {
                 console.error("Error deleting:", error);
                 showNotification(`Error deleting: ${error.message}`, "error");
             }
+        }
+    };
+
+    const handleEditClick = (method: any) => {
+        setEditingMethod(method);
+        setEditName(method.name);
+        setEditAccountNumbers(Array.isArray(method.accountNumbers) ? method.accountNumbers : [method.accountNumber || ""]);
+        setEditLogoFile(null);
+    };
+
+    const handleAddEditAccountNumber = () => {
+        setEditAccountNumbers([...editAccountNumbers, ""]);
+    };
+
+    const handleRemoveEditAccountNumber = (index: number) => {
+        if (editAccountNumbers.length > 1) {
+            setEditAccountNumbers(editAccountNumbers.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleEditAccountNumberChange = (index: number, value: string) => {
+        const newAccountNumbers = [...editAccountNumbers];
+        newAccountNumbers[index] = value;
+        setEditAccountNumbers(newAccountNumbers);
+    };
+
+    const handleUpdateMethod = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingMethod) return;
+
+        const validAccountNumbers = editAccountNumbers.filter((num: string) => num.trim() !== "");
+
+        if (!editName || validAccountNumbers.length === 0) {
+            showNotification("Please provide all fields.", "error");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            let logoUrl = editingMethod.logo;
+            if (editLogoFile) {
+                logoUrl = await uploadToCloudinary(editLogoFile);
+            }
+
+            await updateDoc(doc(db, "PaymentMethods", editingMethod.id), {
+                name: editName,
+                accountNumbers: validAccountNumbers,
+                logo: logoUrl
+            });
+
+            showNotification("Payment method updated successfully!", "success");
+            setEditingMethod(null);
+        } catch (error: any) {
+            console.error("Error updating payment method:", error);
+            showNotification(`Failed to update: ${error.message}`, "error");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -328,13 +391,22 @@ export default function AdminPaymentMethodsPage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleDeleteMethod(method.id)}
-                                                className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex-shrink-0"
-                                                title="Delete"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                            </button>
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    onClick={() => handleEditClick(method)}
+                                                    className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all flex-shrink-0"
+                                                    title="Edit"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteMethod(method.id)}
+                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex-shrink-0"
+                                                    title="Delete"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -343,6 +415,108 @@ export default function AdminPaymentMethodsPage() {
                     </div>
                 </div>
             </div>
+
+
+
+            {/* Edit Modal */}
+            {
+                editingMethod && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                        <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
+                            <button
+                                onClick={() => setEditingMethod(null)}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+
+                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                                <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                Edit Payment Method
+                            </h2>
+
+                            <form onSubmit={handleUpdateMethod} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Method Name</label>
+                                    <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        className="w-full h-12 bg-[#0a0a0a]/50 border border-white/10 rounded-xl px-4 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-gray-600"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5 ml-1">
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Account Numbers</label>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddEditAccountNumber}
+                                            className="p-1 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all"
+                                            title="Add Account Number"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                        {editAccountNumbers.map((accountNum, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={accountNum}
+                                                    onChange={(e) => handleEditAccountNumberChange(index, e.target.value)}
+                                                    className="flex-1 h-12 bg-[#0a0a0a]/50 border border-white/10 rounded-xl px-4 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-gray-600 font-mono"
+                                                    placeholder="e.g. 1000123456789"
+                                                    required
+                                                />
+                                                {editAccountNumbers.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveEditAccountNumber(index)}
+                                                        className="p-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                                                        title="Remove"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Update Logo (Optional)</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setEditLogoFile(e.target.files ? e.target.files[0] : null)}
+                                            className="w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-blue-600 transition-all cursor-pointer border border-white/10 rounded-xl bg-[#0a0a0a]/50"
+                                        />
+                                    </div>
+                                    {editLogoFile ? (
+                                        <p className="text-xs text-blue-400 mt-1 ml-1 truncate">Selected: {editLogoFile.name}</p>
+                                    ) : null}
+                                    {!editLogoFile && editingMethod.logo && <p className="text-xs text-gray-500 mt-1 ml-1 truncate">Current logo will be kept if no new file selected.</p>}
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
+                                >
+                                    {isLoading ? (
+                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                                    ) : (
+                                        "Save Changes"
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     );
 }
