@@ -110,24 +110,32 @@ export default function ProductDetailPage() {
                 });
 
                 // --- 5. Distribute Commissions (Write Phase) ---
-                const rates = [0.10, 0.05, 0.03, 0.02]; // Levels A, B, C, D (corresponding to inviterA, B, C, D)
+                // ONLY if this is the first time (invitationRewardClaimed is false/undefined)
+                if (!userData.invitationRewardClaimed) {
+                    const rates = [0.10, 0.05, 0.03, 0.02]; // Levels A, B, C, D (corresponding to inviterA, B, C, D)
 
-                inviterSnaps.forEach((invSnap, index) => {
-                    if (invSnap && invSnap.exists()) {
-                        const inviterData = invSnap.data() as any;
-                        const reward = Number(product.price) * rates[index];
-                        const inviterRef = inviterRefs[index];
+                    inviterSnaps.forEach((invSnap, index) => {
+                        if (invSnap && invSnap.exists()) {
+                            const inviterData = invSnap.data() as any;
+                            const reward = Number(product.price) * rates[index];
+                            const inviterRef = inviterRefs[index];
 
-                        if (inviterRef) {
-                            // Update Inviter Wallet
-                            transaction.update(inviterRef, {
-                                inviteWallet: (Number(inviterData.inviteWallet) || 0) + reward,
-                                totalTeamIncome: (Number(inviterData.totalTeamIncome) || 0) + reward
-                            });
-                            console.log(`commission distributed to level ${index} (uid: ${inviterData.uid}): ${reward}`);
+                            if (inviterRef) {
+                                // Update Inviter Wallet
+                                transaction.update(inviterRef, {
+                                    inviteWallet: (Number(inviterData.inviteWallet) || 0) + reward,
+                                    totalTeamIncome: (Number(inviterData.totalTeamIncome) || 0) + reward
+                                });
+                                console.log(`commission distributed to level ${index} (uid: ${inviterData.uid}): ${reward}`);
+                            }
                         }
-                    }
-                });
+                    });
+
+                    // Mark reward as claimed
+                    transaction.update(userRef, {
+                        invitationRewardClaimed: true
+                    });
+                }
             });
 
             showNotification(t.dashboard.investmentSuccessful, "success");
