@@ -409,32 +409,65 @@ export default function ProductDetailPage() {
                                 <span className="text-[#5822b3] font-black">{product.price.toLocaleString()} Br</span>
                             </div>
 
-                            <p className="text-[#4491f6] text-[13px] font-bold mt-4">The upper limit is {product.purchaseLimit} times</p>
 
-                            <button
-                                onClick={handleConfirmPurchase}
-                                disabled={isBuying}
-                                className="w-full h-16 bg-[#4c1cbd] hover:bg-[#3d169e] disabled:bg-gray-400 text-white font-black text-xl rounded-2xl shadow-xl shadow-blue-900/10 transition-all flex items-center justify-center gap-3 mt-8 active:scale-[0.98] uppercase tracking-widest"
-                            >
-                                {isBuying ? (
-                                    <div className="animate-spin h-6 w-6 border-4 border-white border-t-transparent rounded-full"></div>
-                                ) : (
-                                    "Confirm"
-                                )}
-                            </button>
+                            {/* Progress Bar in Modal */}
+                            <div className="mt-6 mb-2">
+                                <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                                    <span className="uppercase tracking-wider">Sold Out</span>
+                                    <span className="text-red-500">{product.soldPercentage || 0}%</span>
+                                </div>
+                                <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-orange-500 to-red-600 shadow-sm"
+                                        style={{ width: `${Math.min(product.soldPercentage || 0, 100)}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <p className="text-[#4491f6] text-[13px] font-bold mt-2">The upper limit is {product.purchaseLimit} times</p>
+
+                            {(product.soldPercentage || 0) >= 100 ? (
+                                <button
+                                    disabled
+                                    className="w-full py-4 mt-6 bg-gray-200 text-gray-400 font-bold rounded-xl cursor-not-allowed"
+                                >
+                                    SOLD OUT
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleConfirmPurchase}
+                                    disabled={isBuying}
+                                    className="w-full h-16 bg-[#4c1cbd] hover:bg-[#3d169e] disabled:bg-gray-400 text-white font-black text-xl rounded-2xl shadow-xl shadow-blue-900/10 transition-all flex items-center justify-center gap-3 mt-8 active:scale-[0.98] uppercase tracking-widest"
+                                >
+                                    {isBuying ? (
+                                        <div className="animate-spin h-6 w-6 border-4 border-white border-t-transparent rounded-full"></div>
+                                    ) : (
+                                        "Confirm"
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Bottom Buy Area - MATCHES IMAGE EXACTLY */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 flex items-center justify-center z-[100]">
-                <button
-                    onClick={() => setShowConfirm(true)}
-                    className="w-full max-w-lg h-16 bg-[#4c1cbd] hover:bg-[#3d169e] text-white font-black text-[17px] rounded-[1.2rem] shadow-2xl shadow-blue-900/20 active:scale-[0.98] transition-all uppercase tracking-[2px]"
-                >
-                    Buy
-                </button>
+            {/* Fixed Bottom Button */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100/50 safe-area-bottom z-40">
+                {(product.soldPercentage || 0) >= 100 ? (
+                    <button
+                        disabled
+                        className="w-full py-4 rounded-2xl bg-gray-100 text-gray-400 font-black text-lg shadow-sm tracking-wide cursor-not-allowed"
+                    >
+                        SOLD OUT
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => setShowConfirm(true)}
+                        className="w-full py-4 rounded-2xl bg-[#5822b3] text-white font-black text-lg shadow-xl shadow-indigo-500/20 active:scale-95 transition-all tracking-wide"
+                    >
+                        Buy Now
+                    </button>
+                )}
             </div>
         </div>
     );
