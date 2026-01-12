@@ -12,7 +12,7 @@ export default function ProductPage() {
     const { t } = useLanguage();
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("DGS");
+    const [activeTab, setActiveTab] = useState("All");
 
     useEffect(() => {
         const q = query(collection(db, "Products"), orderBy("createdAt", "desc"));
@@ -31,7 +31,7 @@ export default function ProductPage() {
         return () => unsubscribe();
     }, []);
 
-    const tabs = ["DGS", "VIP", "Limited"];
+    const tabs = ["All", "DGS", "VIP", "Limited"];
 
     if (loading) {
         return (
@@ -129,6 +129,19 @@ export default function ProductPage() {
                 <div className="grid grid-cols-1 gap-6 pb-12">
                     {products.filter(p => {
                         const cat = p.category || "DGS"; // Default to DGS if missing
+                        const isSoldOut = (p.soldPercentage || 0) >= 100;
+
+                        if (activeTab === "Limited") {
+                            return cat === "Limited" || isSoldOut;
+                        }
+
+                        // For other tabs, exclude sold out items
+                        if (isSoldOut) return false;
+
+                        if (activeTab === "All") {
+                            return cat !== "Limited";
+                        }
+
                         return cat === activeTab;
                     }).length === 0 ? (
                         <div className="py-20 flex flex-col items-center justify-center text-gray-500 gap-4">
@@ -142,14 +155,55 @@ export default function ProductPage() {
                     ) : (
                         products.filter(p => {
                             const cat = p.category || "DGS";
+                            const isSoldOut = (p.soldPercentage || 0) >= 100;
+
+                            if (activeTab === "Limited") {
+                                return cat === "Limited" || isSoldOut;
+                            }
+
+                            // For other tabs, exclude sold out items
+                            if (isSoldOut) return false;
+
+                            if (activeTab === "All") {
+                                return cat !== "Limited";
+                            }
                             return cat === activeTab;
                         }).map((product) => (
                             <div key={product.id} className="relative group perspective">
                                 <div className="absolute inset-0 bg-blue-600/5 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                                 <div className="relative bg-[#141414]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] p-5 hover:border-blue-500/30 transition-all duration-500 hover:translate-y-[-4px] shadow-2xl">
                                     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                                        <div className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg backdrop-blur-md">
-                                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-tighter">Premium</span>
+
+                                    </div>
+
+                                    {/* Progress Bar Section - Moved to Top */}
+                                    <div className="mb-6 mt-2">
+                                        <div className="flex justify-between items-center mb-1.5 px-1">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Sales Progress</span>
+                                            <span className={`text-xs font-black ${(product.soldPercentage || 0) >= 100 ? 'text-red-500' : 'text-white'}`}>
+                                                {product.soldPercentage || 0}%
+                                            </span>
+                                        </div>
+                                        <div className="h-5 w-full bg-[#0f0f0f] rounded-lg overflow-hidden border border-white/5 relative p-[2px] shadow-inner">
+                                            {/* Track Background Pattern */}
+                                            <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,#ffffff_2px,#ffffff_4px)]"></div>
+
+                                            <div
+                                                className="h-full rounded-md relative overflow-hidden transition-all duration-1000 ease-out flex items-center"
+                                                style={{ width: `${Math.min(product.soldPercentage || 0, 100)}%` }}
+                                            >
+                                                {/* Vertical Gradient Fill */}
+                                                <div className="absolute inset-0 bg-gradient-to-b from-orange-400 via-red-500 to-red-700"></div>
+
+                                                {/* Striped Animation Overlay */}
+                                                <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1)_10px,transparent_10px,transparent_20px)] animate-pulse"></div>
+
+                                                {/* Glass Highlight Top */}
+                                                <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/40 to-transparent"></div>
+
+                                                {/* Right Edge Glow */}
+                                                <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-white/60 blur-[1px]"></div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -190,12 +244,21 @@ export default function ProductPage() {
 
                                     {/* Action Area */}
                                     <div className="mt-6">
-                                        <button
-                                            onClick={() => router.push(`/product/${product.id}`)}
-                                            className="w-full h-14 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 hover:from-blue-500 hover:to-purple-700 text-white font-black text-sm rounded-2xl shadow-[0_10px_20px_rgba(59,130,246,0.3)] transform active:scale-95 transition-all uppercase tracking-widest border border-white/20"
-                                        >
-                                            {t.dashboard.buyPlan}
-                                        </button>
+                                        {(product.soldPercentage || 0) >= 100 ? (
+                                            <button
+                                                disabled
+                                                className="w-full py-4 rounded-xl bg-white/5 border border-white/5 text-gray-500 font-black tracking-widest cursor-not-allowed"
+                                            >
+                                                SOLD OUT
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => router.push(`/product/${product.id}`)}
+                                                className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-600/30 text-white font-black tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                            >
+                                                {t.dashboard.buyPlan}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

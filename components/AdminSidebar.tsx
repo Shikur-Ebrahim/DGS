@@ -78,6 +78,7 @@ export default function AdminSidebar() {
 
         // The Requested ADDITION
         { name: "Team Search & Track", path: "/admin/team-search", icon: Icons.Search },
+        { name: "Product Tracked", path: "/admin/product-tracker", icon: Icons.List },
 
         // User Management
         { name: "Customers", path: "/admin/customers", icon: Icons.Users },
