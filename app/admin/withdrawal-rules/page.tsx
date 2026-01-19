@@ -23,6 +23,7 @@ export default function AdminWithdrawalRulesPage() {
     const [selectedUser, setSelectedUser] = useState("");
     const [restrictionReason, setRestrictionReason] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [isRestrictAll, setIsRestrictAll] = useState(false);
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user: any) => {
@@ -126,21 +127,28 @@ export default function AdminWithdrawalRulesPage() {
     };
 
     const handleAddRestriction = async () => {
-        if (!selectedUser || !restrictionReason) {
-            alert("Please select a user and provide a reason");
+        if (!isRestrictAll && !selectedUser) {
+            alert("Please select a user");
+            return;
+        }
+        if (!restrictionReason) {
+            alert("Please provide a reason");
             return;
         }
 
+        const targetId = isRestrictAll ? "ALL_USERS" : selectedUser;
+
         try {
-            await setDoc(doc(db, "WithdrawalRestrictions", selectedUser), {
-                userId: selectedUser,
+            await setDoc(doc(db, "WithdrawalRestrictions", targetId), {
+                userId: targetId,
                 isRestricted: true,
                 reason: restrictionReason,
                 restrictedAt: serverTimestamp()
             });
-            setSelectedUser("");
+            if (!isRestrictAll) setSelectedUser("");
             setRestrictionReason("");
-            alert("User restricted successfully!");
+            setIsRestrictAll(false);
+            alert(isRestrictAll ? "All users restricted successfully!" : "User restricted successfully!");
         } catch (error) {
             console.error("Error adding restriction:", error);
             alert("Failed to restrict user");
@@ -294,27 +302,42 @@ export default function AdminWithdrawalRulesPage() {
                     <div className="mb-6 p-4 bg-black/40 rounded-xl">
                         <h3 className="text-sm font-bold text-gray-400 mb-4">Add New Restriction</h3>
                         <div className="space-y-4">
-                            <div>
+                            <div className="flex items-center gap-3 p-3 bg-red-600/10 border border-red-600/20 rounded-lg mb-2">
                                 <input
-                                    type="text"
-                                    placeholder="Search users..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none mb-2"
+                                    type="checkbox"
+                                    id="restrictAll"
+                                    checked={isRestrictAll}
+                                    onChange={(e) => setIsRestrictAll(e.target.checked)}
+                                    className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
                                 />
-                                <select
-                                    value={selectedUser}
-                                    onChange={(e) => setSelectedUser(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                                >
-                                    <option value="">Select a user</option>
-                                    {filteredCustomers.map(customer => (
-                                        <option key={customer.id} value={customer.id}>
-                                            {customer.phoneNumber} - {customer.email}
-                                        </option>
-                                    ))}
-                                </select>
+                                <label htmlFor="restrictAll" className="text-sm font-bold text-red-500 cursor-pointer">
+                                    Restrict All Users Automatically
+                                </label>
                             </div>
+
+                            {!isRestrictAll && (
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search users..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none mb-2"
+                                    />
+                                    <select
+                                        value={selectedUser}
+                                        onChange={(e) => setSelectedUser(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                                    >
+                                        <option value="">Select a user</option>
+                                        {filteredCustomers.map(customer => (
+                                            <option key={customer.id} value={customer.id}>
+                                                {customer.phoneNumber} - {customer.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             <input
                                 type="text"
                                 placeholder="Reason for restriction"
@@ -324,9 +347,9 @@ export default function AdminWithdrawalRulesPage() {
                             />
                             <button
                                 onClick={handleAddRestriction}
-                                className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors"
+                                className={`w-full font-bold py-3 rounded-lg transition-colors ${isRestrictAll ? 'bg-red-700 hover:bg-red-600' : 'bg-red-600 hover:bg-red-500'} text-white`}
                             >
-                                Restrict User
+                                {isRestrictAll ? 'Restrict All Users' : 'Restrict User'}
                             </button>
                         </div>
                     </div>
@@ -341,9 +364,15 @@ export default function AdminWithdrawalRulesPage() {
                                 {restrictions.map(restriction => {
                                     const customer = customers.find(c => c.id === restriction.userId);
                                     return (
-                                        <div key={restriction.id} className="bg-black/40 rounded-lg p-4 flex items-center justify-between">
+                                        <div key={restriction.id} className={`bg-black/40 rounded-lg p-4 flex items-center justify-between ${restriction.userId === 'ALL_USERS' ? 'border-2 border-red-600/50' : ''}`}>
                                             <div>
-                                                <p className="font-bold text-white">{customer?.phoneNumber || 'Unknown'}</p>
+                                                <p className="font-bold text-white">
+                                                    {restriction.userId === 'ALL_USERS' ? (
+                                                        <span className="text-red-500">!!! ALL USERS !!!</span>
+                                                    ) : (
+                                                        customer?.phoneNumber || 'Unknown'
+                                                    )}
+                                                </p>
                                                 <p className="text-sm text-gray-400">{restriction.reason}</p>
                                                 <p className="text-xs text-gray-600 mt-1">
                                                     {restriction.restrictedAt?.seconds ? new Date(restriction.restrictedAt.seconds * 1000).toLocaleString() : ''}

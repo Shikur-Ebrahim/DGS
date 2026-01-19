@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, updateDoc, orderBy, where, deleteDoc } from "firebase/firestore";
+import { collection, query, getDocs, doc, updateDoc, orderBy, where, deleteDoc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import AdminSidebar from "@/components/AdminSidebar";
 
@@ -28,6 +28,11 @@ export default function WithdrawalWalletPage() {
     const [editingAmount, setEditingAmount] = useState<string | null>(null);
     const [editedAmounts, setEditedAmounts] = useState<{ [key: string]: number }>({});
     const [editReasons, setEditReasons] = useState<{ [key: string]: string }>({});
+
+    // Rejection Modal State
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectingWithdrawal, setRejectingWithdrawal] = useState<Withdrawal | null>(null);
+    const [shouldRefund, setShouldRefund] = useState(false);
 
     // System Check State
     const [checkPhone, setCheckPhone] = useState("");
@@ -214,6 +219,14 @@ export default function WithdrawalWalletPage() {
     };
 
     const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'rejected') => {
+        if (newStatus === 'rejected') {
+            const withdrawal = withdrawals.find(w => w.id === id);
+            if (!withdrawal) return;
+            setRejectingWithdrawal(withdrawal);
+            setShowRejectModal(true);
+            return;
+        }
+
         if (!confirm(`Are you sure you want to ${newStatus} this withdrawal?`)) return;
 
         setProcessingId(id);
@@ -232,6 +245,56 @@ export default function WithdrawalWalletPage() {
         } catch (error) {
             console.error("Error updating status:", error);
             alert("Failed to update withdrawal status");
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
+    const confirmRejection = async () => {
+        if (!rejectingWithdrawal) return;
+
+        setProcessingId(rejectingWithdrawal.id);
+        try {
+            await runTransaction(db, async (transaction) => {
+                const withdrawRef = doc(db, "withdraw", rejectingWithdrawal.id);
+
+                // 1. Update withdrawal status
+                transaction.update(withdrawRef, {
+                    status: 'rejected',
+                    rejectedAt: new Date().toISOString(),
+                    refunded: shouldRefund
+                });
+
+                // 2. Perform refund if requested
+                if (shouldRefund) {
+                    const userRef = doc(db, "Customers", rejectingWithdrawal.userId);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!userSnap.exists()) {
+                        throw new Error("User document not found for refund");
+                    }
+
+                    const currentBalance = Number(userSnap.data().balanceWallet || 0);
+                    const refundAmount = Number(rejectingWithdrawal.amount);
+
+                    transaction.update(userRef, {
+                        balanceWallet: currentBalance + refundAmount
+                    });
+                }
+            });
+
+            // Update local state
+            setWithdrawals((prev: any[]) => prev.map((w: any) =>
+                w.id === rejectingWithdrawal.id ? { ...w, status: 'rejected' } : w
+            ));
+
+            alert(`Withdrawal rejected ${shouldRefund ? 'and refunded' : ''} successfully!`);
+            setShowRejectModal(false);
+            setRejectingWithdrawal(null);
+            setShouldRefund(false);
+        } catch (error: any) {
+            console.error("Error confirming rejection:", error);
+            alert("Failed to reject withdrawal: " + error.message);
         } finally {
             setProcessingId(null);
         }
@@ -567,6 +630,73 @@ export default function WithdrawalWalletPage() {
                     )}
                 </div>
             </div>
+
+            {/* Rejection Modal */}
+            {showRejectModal && rejectingWithdrawal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-red-100 rounded-full">
+                                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-900">Reject Withdrawal</h2>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-500 font-medium">User:</span>
+                                <span className="text-gray-900 font-bold">{rejectingWithdrawal.phoneNumber}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 font-medium">Amount:</span>
+                                <span className="text-red-600 font-black">{rejectingWithdrawal.amount.toLocaleString()} ETB</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200 mb-8 cursor-pointer group" onClick={() => setShouldRefund(!shouldRefund)}>
+                            <div className="flex items-center h-6">
+                                <input
+                                    type="checkbox"
+                                    checked={shouldRefund}
+                                    onChange={(e) => setShouldRefund(e.target.checked)}
+                                    className="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-bold text-amber-900 cursor-pointer">
+                                    Return amount to user's wallet
+                                </label>
+                                <p className="text-xs text-amber-700/70 mt-0.5">
+                                    Checking this will automatically add {rejectingWithdrawal.amount.toLocaleString()} ETB back to the customer's balance.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowRejectModal(false);
+                                    setRejectingWithdrawal(null);
+                                    setShouldRefund(false);
+                                }}
+                                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmRejection}
+                                disabled={processingId === rejectingWithdrawal.id}
+                                className="flex-1 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/30 transition-all disabled:opacity-50"
+                            >
+                                {processingId === rejectingWithdrawal.id ? 'Processing...' : 'Confirm Reject'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

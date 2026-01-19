@@ -119,6 +119,15 @@ export default function WithdrawalPage() {
 
         // Check if user is restricted
         const checkRestriction = async () => {
+            // Check for global restriction first
+            const globalRestrictionDoc = await getDoc(doc(db, "WithdrawalRestrictions", "ALL_USERS"));
+            if (globalRestrictionDoc.exists() && globalRestrictionDoc.data().isRestricted) {
+                setIsRestricted(true);
+                setRestrictionReason(globalRestrictionDoc.data().reason || "System-wide withdrawal restriction is active.");
+                return; // Global restriction takes precedence
+            }
+
+            // Check for individual user restriction
             const restrictionDoc = await getDoc(doc(db, "WithdrawalRestrictions", user.id));
             if (restrictionDoc.exists() && restrictionDoc.data().isRestricted) {
                 setIsRestricted(true);
