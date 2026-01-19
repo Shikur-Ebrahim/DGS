@@ -258,25 +258,31 @@ export default function WithdrawalWalletPage() {
             await runTransaction(db, async (transaction) => {
                 const withdrawRef = doc(db, "withdraw", rejectingWithdrawal.id);
 
-                // 1. Update withdrawal status
+                // 1. Perform reads first (Firestore requirement)
+                let currentBalance = 0;
+                let userRef;
+
+                if (shouldRefund) {
+                    userRef = doc(db, "Customers", rejectingWithdrawal.userId);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!userSnap.exists()) {
+                        throw new Error("User document not found for refund");
+                    }
+                    currentBalance = Number(userSnap.data().balanceWallet || 0);
+                }
+
+                // 2. Perform writes
+                // Update withdrawal status
                 transaction.update(withdrawRef, {
                     status: 'rejected',
                     rejectedAt: new Date().toISOString(),
                     refunded: shouldRefund
                 });
 
-                // 2. Perform refund if requested
-                if (shouldRefund) {
-                    const userRef = doc(db, "Customers", rejectingWithdrawal.userId);
-                    const userSnap = await transaction.get(userRef);
-
-                    if (!userSnap.exists()) {
-                        throw new Error("User document not found for refund");
-                    }
-
-                    const currentBalance = Number(userSnap.data().balanceWallet || 0);
+                // Refund to user wallet if requested
+                if (shouldRefund && userRef) {
                     const refundAmount = Number(rejectingWithdrawal.amount);
-
                     transaction.update(userRef, {
                         balanceWallet: currentBalance + refundAmount
                     });
