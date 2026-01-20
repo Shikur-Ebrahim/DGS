@@ -150,14 +150,16 @@ export default function WelcomePage() {
                         const data = doc.data();
                         setUserData({
                             ...data,
-                            uid: data.uid || user.uid, // Fallback to auth UID if not in doc
+                            uid: data.uid || user.uid,
                             phoneNumber: data.phoneNumber || ""
                         });
-                        // Sync income on every data refresh/login
-                        syncUserIncome(user.uid);
                     }
                     setHasCheckedAuth(true);
                 });
+
+                // Sync income ONLY ONCE when user is detected
+                syncUserIncome(user.uid);
+                checkAndPaySalary(user.uid);
             } else {
                 if (unsubscribeDoc) unsubscribeDoc();
                 setUserData(null);
@@ -171,44 +173,31 @@ export default function WelcomePage() {
         };
     }, []);
 
-    // Check for Monthly Salary
+    // Monthly salary check is now handled once in the auth effect for efficiency
+
+    // Check for pending recharge requests using a real-time listener (Efficient)
     useEffect(() => {
         const user = auth.currentUser;
-        if (user) {
-            checkAndPaySalary(user.uid);
-        }
-    }, [userData]);
+        if (!user) return;
 
-    // Check for pending recharge requests
-    useEffect(() => {
-        const checkPendingRecharge = async () => {
-            const user = auth.currentUser;
-            if (user) {
-                const q = query(
-                    collection(db, "RechargeReview"),
-                    where("userId", "==", user.uid),
-                    where("status", "==", "pending")
-                );
+        const q = query(
+            collection(db, "RechargeReview"),
+            where("userId", "==", user.uid),
+            where("status", "==", "pending")
+        );
 
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    const pendingRequest = snapshot.docs[0].data();
-                    setHasPendingRecharge(true);
-                    setPendingAmount(pendingRequest.amount || '0');
-                } else {
-                    setHasPendingRecharge(false);
-                    setPendingAmount('');
-                }
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            if (!snapshot.empty) {
+                const pendingRequest = snapshot.docs[0].data();
+                setHasPendingRecharge(true);
+                setPendingAmount(pendingRequest.amount || '0');
+            } else {
+                setHasPendingRecharge(false);
+                setPendingAmount('');
             }
-        };
+        });
 
-        // Check immediately
-        checkPendingRecharge();
-
-        // Check every 5 seconds for updates
-        const interval = setInterval(checkPendingRecharge, 5000);
-
-        return () => clearInterval(interval);
+        return () => unsubscribe();
     }, []);
 
     // Auto-scroll effect
