@@ -46,20 +46,41 @@ export default function ProductDetailPage() {
         setIsBuying(true);
 
         try {
+            // --- Preliminary Checks (Before Transaction) ---
+
+            // 1. Check User Balance First
+            const userRef = doc(db, "Customers", userId);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                throw new Error("User profile not found");
+            }
+
+            const currentBalance = userSnap.data().balanceWallet || 0;
+            if (currentBalance < product.price) {
+                showNotification(t.dashboard.insufficientBalanceRecharge, "error");
+                setTimeout(() => router.push('/recharge'), 2000);
+                setIsBuying(false);
+                return;
+            }
+
+            // 2. Check Purchase Limit
+            const ordersRef = collection(db, "UserOrders");
+            const q = query(ordersRef, where("userId", "==", userId), where("productId", "==", product.id));
+            const existingOrdersSnap = await getDocs(q);
+
+            if (existingOrdersSnap.size >= (product.purchaseLimit || 1)) {
+                showNotification(`${t.dashboard.limitReached} ${product.purchaseLimit}`, "error");
+                setIsBuying(false);
+                return;
+            }
+
+            // --- Start Transaction ---
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, "Customers", userId);
                 const userSnap = await transaction.get(userRef);
 
                 if (!userSnap.exists()) throw new Error("User profile not found");
-
-                // 1. Check purchase limit
-                const ordersRef = collection(db, "UserOrders");
-                const q = query(ordersRef, where("userId", "==", userId), where("productId", "==", product.id));
-                const existingOrdersSnap = await getDocs(q);
-
-                if (existingOrdersSnap.size >= (product.purchaseLimit || 1)) {
-                    throw new Error("LIMIT_REACHED");
-                }
 
                 const currentBalance = userSnap.data().balanceWallet || 0;
 
